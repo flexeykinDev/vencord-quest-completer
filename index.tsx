@@ -452,12 +452,13 @@ export default definePlugin({
 
     patches: [
         {
-            // Функция, решающая, в какую секцию страницы Quests попадёт квест.
-            // Возврат null = квест не показывается нигде (так Discord прячет истёкшие).
-            find: "questIdsBySectionIdentifier:",
+            // Хук, собирающий массив квестов для страницы Quests: и для секций,
+            // и для плоского списка. Условие "all"=== оставляет вкладку
+            // Claimed Quests нетронутой, иначе она стала бы вечно пустой.
+            find: "removeExpiredQuests&&",
             replacement: {
-                match: /(?=let\{quest:\i,hero:\i,discoveredAtByQuestId:\i,questIdsBySectionIdentifier:\i,[^}]*\}=(\i),)/,
-                replace: "if($self.shouldHideQuest($1?.quest))return null;"
+                match: /("all"===(\i)&&\i\.removeExpiredQuests[^;]*;null==(\i)\|\|\i\|\|)(?=\i\.push\(\3\))/,
+                replace: "$1(\"all\"===$2&&$self.shouldHideQuest($3))||"
             }
         },
         {
