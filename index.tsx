@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
 */
 
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { find, findComponentByCodeLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, showToast, Toasts, useEffect } from "@webpack/common";
 
@@ -47,6 +48,94 @@ const getStreamingStore = () => getStore("ApplicationStreamingStore", m => m.get
 const SUPPORTED_TASKS = ["WATCH_VIDEO", "PLAY_ON_DESKTOP", "STREAM_ON_DESKTOP", "PLAY_ACTIVITY", "WATCH_VIDEO_ON_MOBILE"];
 
 class Aborted extends Error { }
+
+// ---------- настройки ----------
+
+const settings = definePluginSettings({
+    filterQuestList: {
+        type: OptionType.BOOLEAN,
+        description: "Фильтровать список квестов на странице Quests",
+        default: true
+    },
+    showAvailable: {
+        type: OptionType.BOOLEAN,
+        description: "Показывать квесты, которые можно принять",
+        default: true
+    },
+    showInProgress: {
+        type: OptionType.BOOLEAN,
+        description: "Показывать квесты в процессе",
+        default: true
+    },
+    showClaimable: {
+        type: OptionType.BOOLEAN,
+        description: "Показывать выполненные, у которых не забрана награда",
+        default: true
+    },
+    showClaimed: {
+        type: OptionType.BOOLEAN,
+        description: "Показывать завершённые (награда уже получена)",
+        default: false
+    },
+    showExpired: {
+        type: OptionType.BOOLEAN,
+        description: "Показывать истёкшие",
+        default: false
+    },
+    onlyOrbs: {
+        type: OptionType.BOOLEAN,
+        description: "Только квесты с наградой в орбах",
+        default: false
+    }
+});
+
+// ---------- фильтр списка квестов ----------
+
+function hasOrbReward(quest: any) {
+    if (quest.userStatus?.orbQuantityClaimed != null) return true;
+
+    const rewardsConfig = quest.config?.rewardsConfig;
+    if (rewardsConfig == null) return false;
+
+    // Точная форма rewardsConfig зависит от версии Discord, поэтому ищем
+    // любое поле, похожее на количество орбов, на двух уровнях вложенности.
+    const looksLikeOrbs = (obj: any) => obj != null && typeof obj === "object" &&
+        Object.keys(obj).some(key => /orb/i.test(key) && obj[key] != null);
+
+    if (looksLikeOrbs(rewardsConfig)) return true;
+
+    const rewards = rewardsConfig.rewards ?? [];
+    return Array.isArray(rewards) && rewards.some(looksLikeOrbs);
+}
+
+function shouldHideQuest(quest: any) {
+    try {
+        if (!settings.store.filterQuestList || quest == null) return false;
+
+        const status = quest.userStatus;
+        const enrolled = status?.enrolledAt != null;
+        const completed = status?.completedAt != null;
+        const claimed = status?.claimedAt != null;
+
+        const expiresAt = quest.config?.expiresAt ?? quest.expiresAt;
+        const expired = expiresAt != null && new Date(expiresAt).getTime() <= Date.now();
+
+        let visible: boolean;
+        if (expired && !claimed && !completed) visible = settings.store.showExpired;
+        else if (claimed) visible = settings.store.showClaimed;
+        else if (completed) visible = settings.store.showClaimable;
+        else if (enrolled) visible = settings.store.showInProgress;
+        else visible = settings.store.showAvailable;
+
+        if (!visible) return true;
+
+        return settings.store.onlyOrbs && !hasOrbReward(quest);
+    } catch (err) {
+        // Если тут кинуть исключение, развалится вся страница квестов
+        logger.error("Ошибка фильтра списка квестов", err);
+        return false;
+    }
+}
 
 // ---------- состояние + подписка для перерисовки кнопки ----------
 
@@ -350,8 +439,18 @@ export default definePlugin({
     name: "QuestCompleter",
     description: "Кнопка рядом с микрофоном: выполняет незавершённые квесты Discord. Нажатие ещё раз останавливает.",
     authors: [{ name: "flexeykin", id: 0n }],
+    settings,
 
     patches: [
+        {
+            // Функция, решающая, в какую секцию страницы Quests попадёт квест.
+            // Возврат null = квест не показывается нигде (так Discord прячет истёкшие).
+            find: "questIdsBySectionIdentifier:",
+            replacement: {
+                match: /(?=let\{quest:\i,hero:\i,discoveredAtByQuestId:\i,questIdsBySectionIdentifier:\i,[^}]*\}=(\i),)/,
+                replace: "if($self.shouldHideQuest($1?.quest))return null;"
+            }
+        },
         {
             // то же место, что у GameActivityToggle; окно поиска шире,
             // чтобы патч прошёл, даже если тот плагин вставил свою кнопку раньше
@@ -366,6 +465,8 @@ export default definePlugin({
     stop() {
         controller?.abort();
     },
+
+    shouldHideQuest,
 
     QuestCompleterButton: ErrorBoundary.wrap(QuestCompleterButton, { noop: true })
 });
