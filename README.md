@@ -197,17 +197,17 @@ Object.keys(m).filter(id => m[id][SYM_PATCHED_BY]?.has?.("QuestCompleter"));
 
 Скрипт из релиза скачивается из интернета и что-то ставит, поэтому проверить его это нормальное желание. Ниже хеши файлов версии 1.0.0 и ссылки на VirusTotal.
 
-| Файл | SHA-256 | VirusTotal |
+| Файл | SHA-256 | Детектов |
 | --- | --- | --- |
 | `setup.ps1` | `e54aa8a2…ddab7d` | [**0 из 62**](https://www.virustotal.com/gui/file/e54aa8a2dbdf1d9e1aa0b9279749c447389048c8c53562eccfd5c82e9bddab7d/detection) |
-| `QuestCompleter-1.0.0.zip` | `72998f70…de6cba` | [ещё не загружался](https://www.virustotal.com/gui/file/72998f7007df39bc9b74744297c475f6a22515daa5ec664b7e45433273de6cba) |
-| `setup.cmd` | `3adb96ca…b87df7` | [ещё не загружался](https://www.virustotal.com/gui/file/3adb96cac1a8d18b86210fa9bebd49dfb39c4fa23a823805c3a557db79b87df7) |
-| `install.cmd` | `905af63d…0d0631` | [ещё не загружался](https://www.virustotal.com/gui/file/905af63d61fa85dd63a435b0c58a77f49c1a0e6ce71c4bf9b80c06a8260d0631) |
-| `uninstall.cmd` | `03db09a1…88db1f` | [ещё не загружался](https://www.virustotal.com/gui/file/03db09a11f612170ebd64cba36461262fb9f182e4d5cb76d22a7ddfe5d88db1f) |
+| `QuestCompleter-1.0.0.zip` | `72998f70…de6cba` | [**0 из 65**](https://www.virustotal.com/gui/file/72998f7007df39bc9b74744297c475f6a22515daa5ec664b7e45433273de6cba/detection) |
+| `setup.cmd` | `3adb96ca…b87df7` | [**0 из 61**](https://www.virustotal.com/gui/file/3adb96cac1a8d18b86210fa9bebd49dfb39c4fa23a823805c3a557db79b87df7/detection) |
+| `install.cmd` | `905af63d…0d0631` | [**0 из 60**](https://www.virustotal.com/gui/file/905af63d61fa85dd63a435b0c58a77f49c1a0e6ce71c4bf9b80c06a8260d0631/detection) |
+| `uninstall.cmd` | `03db09a1…88db1f` | [**0 из 61**](https://www.virustotal.com/gui/file/03db09a11f612170ebd64cba36461262fb9f182e4d5cb76d22a7ddfe5d88db1f/detection) |
 
-`setup.ps1` это тот самый файл, который скачивается и запускается командой установки, то есть главный к проверке. Результат на 19 сентября 2026: ни один из 62 антивирусов не отметил файл, тип определён как powershell. Ссылка ведёт на живой отчёт, там всегда актуальные цифры.
+Проверено 19 сентября 2026: ни один антивирус не отметил ни один файл. Разное число в знаменателе это нормально, VirusTotal гоняет разный набор движков в зависимости от типа файла.
 
-Остальные файлы это ярлыки в две строки и архив с исходниками, их никто пока не загружал. Хеши указаны, отчёт появится сразу после первой загрузки.
+Ссылки ведут на живые отчёты, там всегда актуальные цифры. Числа относятся к версии 1.0.0: у следующей версии будут другие хеши и другие ссылки.
 
 Сверить скачанный файл со списком:
 
