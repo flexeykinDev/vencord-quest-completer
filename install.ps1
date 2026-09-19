@@ -61,6 +61,47 @@ function Test-Tool ($name) {
     return $null -ne (Get-Command $name -ErrorAction SilentlyContinue)
 }
 
+function Update-PathFromRegistry {
+    # winget ставит инструменты в PATH, но текущее окно об этом ещё не знает
+    $machine = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $user = [Environment]::GetEnvironmentVariable("Path", "User")
+    $env:Path = "$machine;$user"
+}
+
+function Install-Prerequisite {
+    param(
+        [string] $Command,
+        [string] $WingetId,
+        [string] $Label,
+        [string] $Site
+    )
+
+    Write-Warn2 "$Label не найден."
+
+    if (-not (Test-Tool "winget")) {
+        Stop-WithError "Нет ни $Label, ни winget. Поставь вручную: $Site"
+    }
+
+    if (-not (Confirm-Yes "Установить $Label автоматически через winget?")) {
+        Stop-WithError "Без $Label установка невозможна. Поставить можно отсюда: $Site"
+    }
+
+    Write-Note "Ставлю $Label, это займёт пару минут..."
+    winget install --id $WingetId --source winget --accept-package-agreements --accept-source-agreements --silent
+
+    if ($LASTEXITCODE -ne 0) {
+        Stop-WithError "winget не справился с установкой $Label. Поставь вручную: $Site"
+    }
+
+    Update-PathFromRegistry
+
+    if (-not (Test-Tool $Command)) {
+        Stop-WithError "$Label установлен, но это окно его ещё не видит. Закрой PowerShell, открой заново и запусти скрипт ещё раз."
+    }
+
+    Write-Ok "$Label установлен"
+}
+
 function Invoke-In ($dir, $exe, $argList) {
     Push-Location $dir
     try {
@@ -80,9 +121,15 @@ if ($Manual) {
     Write-Host "=== Установка $PluginName вручную ===" -ForegroundColor Cyan
     Write-Host @"
 
-  1. Поставь Node.js 20+ и git, затем pnpm:
+  1. Поставь Node.js 20+ и git (winget встроен в Windows 11),
+     затем pnpm:
 
+         winget install OpenJS.NodeJS.LTS
+         winget install Git.Git
          npm i -g pnpm
+
+     После winget закрой и открой PowerShell заново, иначе
+     команды node и git ещё не будут видны.
 
   2. Склонируй Vencord и установи зависимости:
 
@@ -127,13 +174,21 @@ Write-Host "=== Установка плагина $PluginName в Vencord ===" -F
 
 Write-Step "Проверяю инструменты"
 
-if (-not (Test-Tool "git"))  { Stop-WithError "Не найден git. Поставь с https://git-scm.com/download/win и запусти скрипт заново." }
-Write-Ok "git есть"
+if (-not (Test-Tool "git")) {
+    Install-Prerequisite -Command "git" -WingetId "Git.Git" -Label "Git" -Site "https://git-scm.com/download/win"
+} else {
+    Write-Ok "git есть"
+}
 
-if (-not (Test-Tool "node")) { Stop-WithError "Не найден Node.js. Поставь LTS с https://nodejs.org и запусти скрипт заново." }
+if (-not (Test-Tool "node")) {
+    Install-Prerequisite -Command "node" -WingetId "OpenJS.NodeJS.LTS" -Label "Node.js" -Site "https://nodejs.org"
+}
 
 $nodeMajor = [int](((node -v) -replace "^v", "") -split "\.")[0]
-if ($nodeMajor -lt 20) { Stop-WithError "Нужен Node.js 20 или новее, а сейчас $(node -v)." }
+if ($nodeMajor -lt 20) {
+    Write-Warn2 "Нужен Node.js 20 или новее, а сейчас $(node -v)."
+    Install-Prerequisite -Command "node" -WingetId "OpenJS.NodeJS.LTS" -Label "Node.js LTS" -Site "https://nodejs.org"
+}
 Write-Ok "Node.js $(node -v)"
 
 if (-not (Test-Tool "pnpm")) {
