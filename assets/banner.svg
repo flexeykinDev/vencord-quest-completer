@@ -5,46 +5,139 @@
             <stop offset="1" stop-color="#121317" />
         </linearGradient>
 
-        <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="accent" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stop-color="#5865f2" />
-            <stop offset="1" stop-color="#23a55a" />
+            <stop offset="0.5" stop-color="#23a55a" />
+            <stop offset="1" stop-color="#5865f2" />
+        </linearGradient>
+
+        <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0" />
+            <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.055" />
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
         </linearGradient>
 
         <clipPath id="card">
             <rect x="0" y="0" width="880" height="200" rx="16" />
         </clipPath>
+
+        <clipPath id="barClip">
+            <rect x="0" y="0" width="5" height="200" />
+        </clipPath>
     </defs>
+
+    <style>
+        /*
+         * Вступление проигрывается один раз, фон живёт бесконечно.
+         * Прозрачность задаётся только здесь: если площадка вырежет
+         * блок стилей, баннер останется видимым, просто без движения.
+         */
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(9px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes barFlow {
+            from { transform: translateY(0); }
+            to   { transform: translateY(200px); }
+        }
+
+        @keyframes sweep {
+            0%, 55%  { transform: translateX(-420px); }
+            100%     { transform: translateX(1000px); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.10; }
+            50%      { opacity: 0.20; }
+        }
+
+        @keyframes breatheSoft {
+            0%, 100% { opacity: 0.06; }
+            50%      { opacity: 0.14; }
+        }
+
+        .bar-flow  { animation: barFlow 5s linear infinite; }
+        .sweep     { animation: sweep 7s ease-in-out 1.4s infinite; }
+        .glow-a    { animation: breathe 7s ease-in-out infinite; }
+        .glow-b    { animation: breatheSoft 9s ease-in-out infinite; }
+
+        .ring {
+            stroke-dasharray: 214;
+            stroke-dashoffset: 214;
+            animation: draw 1s ease-out 0.15s forwards;
+        }
+
+        .check {
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: draw 0.5s ease-out 0.85s forwards;
+        }
+
+        .in {
+            opacity: 0;
+            animation: fadeUp 0.6s ease-out forwards;
+        }
+
+        .d1 { animation-delay: 0.30s; }
+        .d2 { animation-delay: 0.50s; }
+        .d3 { animation-delay: 0.95s; }
+        .d4 { animation-delay: 1.08s; }
+        .d5 { animation-delay: 1.21s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .bar-flow, .sweep, .glow-a, .glow-b, .ring, .check, .in {
+                animation: none;
+            }
+            .in    { opacity: 1; }
+            .ring  { stroke-dashoffset: 0; }
+            .check { stroke-dashoffset: 0; }
+            .glow-a { opacity: 0.14; }
+            .glow-b { opacity: 0.09; }
+        }
+    </style>
 
     <g clip-path="url(#card)">
         <rect x="0" y="0" width="880" height="200" fill="url(#bg)" />
 
-        <!-- мягкое свечение справа -->
-        <circle cx="820" cy="34" r="150" fill="#5865f2" opacity="0.10" />
-        <circle cx="700" cy="196" r="120" fill="#23a55a" opacity="0.08" />
+        <circle class="glow-a" cx="820" cy="34" r="150" fill="#5865f2" opacity="0.14" />
+        <circle class="glow-b" cx="700" cy="196" r="120" fill="#23a55a" opacity="0.09" />
 
-        <!-- акцентная полоса слева -->
-        <rect x="0" y="0" width="5" height="200" fill="url(#accent)" />
+        <rect class="sweep" x="0" y="-40" width="220" height="280" fill="url(#sweep)" transform="skewX(-18)" />
+
+        <g clip-path="url(#barClip)">
+            <rect class="bar-flow" x="0" y="-200" width="5" height="400" fill="url(#accent)" />
+        </g>
     </g>
 
     <rect x="0.5" y="0.5" width="879" height="199" rx="16" fill="none" stroke="#2f3136" />
 
     <!-- иконка: та же галочка в круге, что у кнопки в Discord -->
     <g transform="translate(56, 62)" fill="none" stroke="#23a55a" stroke-width="5">
-        <circle cx="38" cy="38" r="34" />
-        <path d="M22 39 l12 12 l20 -25" stroke-linecap="round" stroke-linejoin="round" />
+        <circle class="ring" cx="38" cy="38" r="34" />
+        <path class="check" d="M22 39 l12 12 l20 -25" stroke-linecap="round" stroke-linejoin="round" />
     </g>
 
-    <text x="152" y="88" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="42" font-weight="700" fill="#f2f3f5">QuestCompleter</text>
-    <text x="153" y="122" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#9aa0a6">Плагин Vencord: квесты Discord в одну кнопку</text>
+    <text class="in d1" x="152" y="88" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="42" font-weight="700" fill="#f2f3f5">QuestCompleter</text>
+    <text class="in d2" x="153" y="122" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="18" fill="#9aa0a6">Плагин Vencord: квесты Discord в одну кнопку</text>
 
     <g transform="translate(153, 142)" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="13" fill="#72767d">
-        <rect x="0" y="0" width="128" height="26" rx="13" fill="#202226" stroke="#2f3136" />
-        <text x="16" y="18">выполнение</text>
-
-        <rect x="138" y="0" width="112" height="26" rx="13" fill="#202226" stroke="#2f3136" />
-        <text x="154" y="18">фильтр</text>
-
-        <rect x="260" y="0" width="150" height="26" rx="13" fill="#202226" stroke="#2f3136" />
-        <text x="276" y="18">без баннера</text>
+        <g class="in d3">
+            <rect x="0" y="0" width="128" height="26" rx="13" fill="#202226" stroke="#2f3136" />
+            <text x="16" y="18">выполнение</text>
+        </g>
+        <g class="in d4">
+            <rect x="138" y="0" width="112" height="26" rx="13" fill="#202226" stroke="#2f3136" />
+            <text x="154" y="18">фильтр</text>
+        </g>
+        <g class="in d5">
+            <rect x="260" y="0" width="150" height="26" rx="13" fill="#202226" stroke="#2f3136" />
+            <text x="276" y="18">без баннера</text>
+        </g>
     </g>
 </svg>
