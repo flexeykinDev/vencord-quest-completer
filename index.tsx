@@ -108,9 +108,12 @@ function hasOrbReward(quest: any) {
     return Array.isArray(rewards) && rewards.some(looksLikeOrbs);
 }
 
+let filterLogsLeft = 30;
+
 function shouldHideQuest(quest: any) {
     try {
         if (!settings.store.filterQuestList || quest == null) return false;
+
 
         const status = quest.userStatus;
         const enrolled = status?.enrolledAt != null;
@@ -127,9 +130,15 @@ function shouldHideQuest(quest: any) {
         else if (enrolled) visible = settings.store.showInProgress;
         else visible = settings.store.showAvailable;
 
-        if (!visible) return true;
+        const hidden = !visible || (settings.store.onlyOrbs && !hasOrbReward(quest));
 
-        return settings.store.onlyOrbs && !hasOrbReward(quest);
+        if (filterLogsLeft > 0) {
+            filterLogsLeft--;
+            const name = quest.config?.messages?.questName ?? quest.id;
+            logger.info(`Фильтр: ${name} | принят=${enrolled} выполнен=${completed} забран=${claimed} истёк=${expired} -> ${hidden ? "СКРЫТ" : "показан"}`);
+        }
+
+        return hidden;
     } catch (err) {
         // Если тут кинуть исключение, развалится вся страница квестов
         logger.error("Ошибка фильтра списка квестов", err);
