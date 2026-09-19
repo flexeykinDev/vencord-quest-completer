@@ -15,19 +15,17 @@
 
 ## Установка
 
-Скачай репозиторий и запусти `setup.ps1`. Он покажет меню: поставить, обновить, удалить.
+Скачай репозиторий и запусти установщик. Он покажет меню: поставить, обновить, удалить.
 
 ```powershell
-gh repo clone flexeykinDev/vencord-quest-completer "$env:TEMP\qc"; & "$env:TEMP\qc\setup.ps1"
+$d="$env:TEMP\qc"; if (Test-Path $d) { Remove-Item $d -Recurse -Force }; gh repo clone flexeykinDev/vencord-quest-completer $d; powershell -NoProfile -ExecutionPolicy Bypass -File "$d\setup.ps1"
 ```
 
 Ставить что-либо заранее не нужно. Чего не хватает для сборки, скрипт предложит доставить через `winget`, встроенный в Windows 11. Про каждый инструмент спрашивает отдельно, молча ничего не ставит.
 
-Если PowerShell откажется запускать скрипт, разреши на одну сессию:
+Если репозиторий уже скачан, достаточно **двойного клика по `setup.cmd`**. Это обёртка, которая запускает `setup.ps1` в обход ExecutionPolicy, не меняя настройки самой системы.
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
+По умолчанию Windows не даёт запускать скачанные скрипты. Поэтому и в команде выше, и в `setup.cmd` стоит `-ExecutionPolicy Bypass`: он действует только на один запущенный процесс. Менять политику машины через `Set-ExecutionPolicy` не нужно.
 
 Когда скрипт закончит, останется три шага в самом Discord:
 
