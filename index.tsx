@@ -238,6 +238,9 @@ async function completeQuest(quest: any, signal: AbortSignal) {
     } else if (taskName === "PLAY_ACTIVITY") {
         const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id
             ?? (Object.values(GuildChannelStore.getAllGuilds()) as any[]).find(x => x != null && x.VOCAL.length > 0)?.VOCAL[0]?.channel?.id;
+
+        if (channelId == null) throw new Error("Для квеста-активности нужен хотя бы один личный чат или сервер с голосовым каналом");
+
         const streamKey = `call:${channelId}:1`;
 
         while (true) {
