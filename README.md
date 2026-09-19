@@ -9,6 +9,7 @@
 <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4" alt="Windows 10 и 11">
 <img src="https://img.shields.io/badge/установщик-PowerShell-5391FE" alt="Установщик на PowerShell">
 <img src="https://img.shields.io/badge/лицензия-GPL--3.0-blue" alt="Лицензия GPL-3.0">
+<a href="https://www.virustotal.com/gui/file/72998f7007df39bc9b74744297c475f6a22515daa5ec664b7e45433273de6cba"><img src="https://img.shields.io/badge/VirusTotal-проверить_по_хешу-394EFF" alt="Проверить на VirusTotal"></a>
 </p>
 
 </div>
@@ -191,6 +192,46 @@ Object.keys(m).filter(id => m[id][SYM_PATCHED_BY]?.has?.("QuestCompleter"));
 Патчи применяются лениво, при первой загрузке модуля. Сообщение на старте о непримененном патче это норма для страницы, которую ещё не открывали.
 
 </details>
+
+## Проверка файлов
+
+Скрипт из релиза скачивается из интернета и что-то ставит, поэтому проверить его это нормальное желание. Ниже хеши файлов версии 1.0.0 и ссылки на VirusTotal.
+
+| Файл | SHA-256 |
+| --- | --- |
+| `QuestCompleter-1.0.0.zip` | [`72998f70…de6cba`](https://www.virustotal.com/gui/file/72998f7007df39bc9b74744297c475f6a22515daa5ec664b7e45433273de6cba) |
+| `setup.ps1` | [`e54aa8a2…ddab7d`](https://www.virustotal.com/gui/file/e54aa8a2dbdf1d9e1aa0b9279749c447389048c8c53562eccfd5c82e9bddab7d) |
+| `setup.cmd` | [`3adb96ca…b87df7`](https://www.virustotal.com/gui/file/3adb96cac1a8d18b86210fa9bebd49dfb39c4fa23a823805c3a557db79b87df7) |
+| `install.cmd` | [`905af63d…0d0631`](https://www.virustotal.com/gui/file/905af63d61fa85dd63a435b0c58a77f49c1a0e6ce71c4bf9b80c06a8260d0631) |
+| `uninstall.cmd` | [`03db09a1…88db1f`](https://www.virustotal.com/gui/file/03db09a11f612170ebd64cba36461262fb9f182e4d5cb76d22a7ddfe5d88db1f) |
+
+Сверить скачанный файл со списком:
+
+```powershell
+Get-FileHash .\setup.ps1 -Algorithm SHA256
+```
+
+Если хеш совпал, файл ровно тот, что лежит в релизе.
+
+### Что делает установщик
+
+Весь код открыт и читается за десять минут, но если коротко:
+
+- скачивает Vencord и этот плагин обычным `git clone`
+- ставит зависимости через `pnpm` и собирает проект
+- запускает **официальный установщик Vencord**, который и подключает сборку к Discord
+- по твоему согласию доставляет Node.js и Git через `winget`
+- запоминает путь к Vencord в `%APPDATA%\QuestCompleter`
+
+Прав администратора не просит, в реестр не пишет, автозапуск не трогает, в сеть ходит только к GitHub и в репозитории winget.
+
+### Почему антивирус может ругаться
+
+Эвристика не любит сам жанр: PowerShell-скрипт, который скачивает файлы из сети, ставит программы и меняет содержимое установленного приложения. Формально это же поведение и у вполне мирных установщиков.
+
+Плюс Vencord меняет файлы Discord, это его работа как клиент-мода. Некоторые защитные решения считают модификацию чужого приложения подозрительной сама по себе, независимо от того, что именно делает мод.
+
+Если антивирус что-то показал, сравни детект с названием вроде `Trojan`, `Miner`, `Stealer`, и проверь по хешу выше. Срабатывания на `PowerShell/Agent`, `HackTool`, `Riskware` и подобное это как раз про жанр, а не про конкретную угрозу.
 
 ## Оговорка
 
