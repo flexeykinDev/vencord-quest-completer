@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { disableStyle, enableStyle } from "@api/Styles";
 import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin from "@utils/types";
 
 import { shouldHideQuest, shouldHideSponsoredBanner } from "./filter";
 import { QuestButton } from "./QuestButton";
 import { stopQuests } from "./runner";
-import { settings } from "./settings";
+import { hideHeroStyle, settings } from "./settings";
 
 export default definePlugin({
     name: "QuestCompleter",
@@ -58,7 +59,14 @@ export default definePlugin({
         }
     ],
 
-    stop: stopQuests,
+    start() {
+        if (settings.store.hideSponsoredBanner) enableStyle(hideHeroStyle);
+    },
+
+    stop() {
+        stopQuests();
+        disableStyle(hideHeroStyle);
+    },
 
     shouldHideQuest,
     shouldHideSponsoredBanner,

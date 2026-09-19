@@ -5,7 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { disableStyle, enableStyle } from "@api/Styles";
 import { OptionType } from "@utils/types";
+
+import hideHeroStyle from "./hideHero.css?managed";
+
+export { hideHeroStyle };
 
 export const settings = definePluginSettings({
     filterQuestList: {
@@ -46,6 +51,10 @@ export const settings = definePluginSettings({
     hideSponsoredBanner: {
         type: OptionType.BOOLEAN,
         description: "Скрывать баннер сверху страницы Quests и ряд карточек под ним",
-        default: true
+        default: true,
+        onChange(value: boolean) {
+            if (value) enableStyle(hideHeroStyle);
+            else disableStyle(hideHeroStyle);
+        }
     }
 });
