@@ -185,61 +185,202 @@ function Test-VencordRoot ($path) {
     }
 }
 
-function Resolve-VencordPath ([switch] $AllowClone) {
-    Write-Step "Ищу папку с исходниками Vencord"
+$ConfigFile = Join-Path $env:APPDATA "QuestCompleter\vencord-path.txt"
 
-    $path = $script:VencordPath
+function Get-SavedVencordPath {
+    if (-not (Test-Path $ConfigFile)) { return $null }
+    try {
+        $saved = (Get-Content $ConfigFile -Raw -Encoding UTF8).Trim()
+        if (Test-VencordRoot $saved) { return $saved }
+    } catch { }
+    return $null
+}
 
-    if (-not $path) {
-        # Скрипт может лежать внутри уже установленного плагина:
-        # <vencord>\src\userplugins\QuestCompleter\setup.ps1
-        $maybeRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..") -ErrorAction SilentlyContinue
-        if ($maybeRoot -and (Test-VencordRoot $maybeRoot.Path)) {
-            $path = $maybeRoot.Path
-            Write-Note "Скрипт запущен изнутри установленного плагина."
+function Save-VencordPath ($path) {
+    try {
+        New-Item -ItemType Directory -Force (Split-Path $ConfigFile) | Out-Null
+        Set-Content $ConfigFile $path -Encoding UTF8
+    } catch {
+        Write-Note "Путь не удалось запомнить, в следующий раз поищу заново."
+    }
+}
+
+<#
+    Пропатченный Discord хранит абсолютный путь к сборке Vencord у себя внутри:
+    установщик подменяет resources\app.asar своей заглушкой с одной строкой
+    require("...\dist\patcher.js"). Это самый надёжный способ найти папку, он не
+    зависит от того, куда её положили. Путь записан с экранированными слешами,
+    отсюда \\{1,2} в шаблоне.
+#>
+function Find-VencordFromDiscord {
+    $pathPattern = '([A-Za-z]:(?:\\{1,2}|/)[^"\r\n\x00]*?)(?:\\{1,2}|/)dist(?:\\{1,2}|/)patcher\.js'
+
+    $roots = @("Discord", "DiscordPTB", "DiscordCanary", "DiscordDevelopment") |
+        ForEach-Object { Join-Path $env:LOCALAPPDATA $_ }
+
+    foreach ($root in $roots) {
+        if (-not (Test-Path $root)) { continue }
+
+        # app.asar это нынешний вариант, app\index.js остался от старых установок
+        $candidates = @()
+        $candidates += Get-ChildItem (Join-Path $root "app-*\resources\app.asar") -ErrorAction SilentlyContinue
+        $candidates += Get-ChildItem (Join-Path $root "app-*\resources\app\index.js") -ErrorAction SilentlyContinue
+
+        foreach ($file in $candidates) {
+            try {
+                $text = [System.IO.File]::ReadAllText($file.FullName, [System.Text.Encoding]::UTF8)
+            } catch { continue }
+
+            if ($text -match $pathPattern) {
+                $candidate = $matches[1] -replace '\\\\', '\'
+                if (Test-VencordRoot $candidate) { return $candidate }
+            }
         }
     }
 
-    if (Test-VencordRoot $path) {
-        $resolved = (Resolve-Path $path).Path
-        Write-Ok "Vencord: $resolved"
-        return $resolved
-    }
+    return $null
+}
 
-    if ($path) { Write-Warn2 "В '$path' исходников Vencord нет." }
-    else { Write-Warn2 "Vencord не найден автоматически." }
+function Find-VencordInCommonFolders {
+    $names = @("Vencord", "Vencord-Custom-Plugin", "vencord")
+    $bases = @(
+        $HOME,
+        (Join-Path $HOME "Documents"),
+        (Join-Path $HOME "Desktop"),
+        (Join-Path $HOME "Downloads"),
+        (Join-Path $HOME "source\repos")
+    )
 
-    Write-Host ""
-    if ($AllowClone) {
-        Write-Note "Укажи путь к папке Vencord либо нажми Enter, чтобы скачать её заново."
-    } else {
-        Write-Note "Укажи путь к папке Vencord."
-    }
-
-    $entered = Read-Host "    Путь"
-
-    if (-not [string]::IsNullOrWhiteSpace($entered)) {
-        if (-not (Test-VencordRoot $entered)) {
-            Stop-WithError "В '$entered' нет исходников Vencord (package.json с именем vencord)."
+    foreach ($base in $bases) {
+        foreach ($name in $names) {
+            $candidate = Join-Path $base $name
+            if (Test-VencordRoot $candidate) { return $candidate }
         }
-        $resolved = (Resolve-Path $entered).Path
-        Write-Ok "Vencord: $resolved"
-        return $resolved
     }
 
-    if (-not $AllowClone) { Stop-WithError "Без папки Vencord продолжать нечего." }
+    return $null
+}
 
-    $cloneTo = Read-Host "    Куда скачать Vencord (Enter = $HOME\Vencord)"
-    if ([string]::IsNullOrWhiteSpace($cloneTo)) { $cloneTo = Join-Path $HOME "Vencord" }
-    if (Test-Path $cloneTo) { Stop-WithError "Папка '$cloneTo' уже существует. Удали её или укажи другую." }
+function Select-FolderDialog ($description) {
+    try {
+        Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+        $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
+        $dialog.Description = $description
+        $dialog.ShowNewFolderButton = $false
+
+        if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+            return $dialog.SelectedPath
+        }
+    } catch {
+        Write-Note "Окно выбора папки не открылось, введи путь вручную."
+        $entered = Read-Host "    Путь"
+        if (-not [string]::IsNullOrWhiteSpace($entered)) { return $entered }
+    }
+
+    return $null
+}
+
+function Install-Vencord {
+    $cloneTo = Join-Path $HOME "Vencord"
+
+    Write-Note "Vencord будет скачан в: $cloneTo"
+    if (Test-Path $cloneTo) {
+        Stop-WithError "Папка '$cloneTo' уже существует, но Vencord в ней не найден. Удали её или запусти скрипт с -VencordPath."
+    }
+
+    if (-not (Confirm-Yes "Скачать Vencord сюда?")) {
+        $picked = Select-FolderDialog "Выбери папку, в которую скачать Vencord"
+        if (-not $picked) { return $null }
+        $cloneTo = Join-Path $picked "Vencord"
+        if (Test-Path $cloneTo) { Stop-WithError "Папка '$cloneTo' уже существует." }
+    }
 
     Write-Step "Скачиваю Vencord"
     git clone $VencordUrl $cloneTo
-    if ($LASTEXITCODE -ne 0) { Stop-WithError "Не удалось склонировать Vencord." }
+    if ($LASTEXITCODE -ne 0) { Stop-WithError "Не удалось скачать Vencord." }
 
-    $resolved = (Resolve-Path $cloneTo).Path
-    Write-Ok "Vencord: $resolved"
-    return $resolved
+    return (Resolve-Path $cloneTo).Path
+}
+
+function Resolve-VencordPath ([switch] $AllowClone) {
+    Write-Step "Ищу папку с исходниками Vencord"
+
+    # 1. Путь из параметра
+    if ($script:VencordPath) {
+        if (-not (Test-VencordRoot $script:VencordPath)) {
+            Stop-WithError "В '$($script:VencordPath)' нет исходников Vencord."
+        }
+        $found = (Resolve-Path $script:VencordPath).Path
+        Write-Ok "Vencord: $found"
+        Save-VencordPath $found
+        return $found
+    }
+
+    # 2. Скрипт лежит внутри уже установленного плагина
+    $maybeRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..") -ErrorAction SilentlyContinue
+    if ($maybeRoot -and (Test-VencordRoot $maybeRoot.Path)) {
+        Write-Note "Скрипт запущен изнутри установленного плагина."
+        Write-Ok "Vencord: $($maybeRoot.Path)"
+        Save-VencordPath $maybeRoot.Path
+        return $maybeRoot.Path
+    }
+
+    # 3. Запомненный путь с прошлого раза
+    $saved = Get-SavedVencordPath
+    if ($saved) {
+        Write-Note "Взял путь, запомненный при прошлой установке."
+        Write-Ok "Vencord: $saved"
+        return $saved
+    }
+
+    # 4. Путь, прописанный в самом пропатченном Discord
+    $fromDiscord = Find-VencordFromDiscord
+    if ($fromDiscord) {
+        Write-Note "Нашёл по записи в установленном Discord."
+        Write-Ok "Vencord: $fromDiscord"
+        Save-VencordPath $fromDiscord
+        return $fromDiscord
+    }
+
+    # 5. Обычные места
+    $common = Find-VencordInCommonFolders
+    if ($common) {
+        Write-Note "Нашёл в обычном месте."
+        Write-Ok "Vencord: $common"
+        Save-VencordPath $common
+        return $common
+    }
+
+    # 6. Спрашиваем
+    Write-Warn2 "Vencord на компьютере не найден."
+    Write-Host ""
+
+    if ($AllowClone) {
+        Write-Host "    1  Скачать Vencord (так и надо, если ставишь впервые)" -ForegroundColor Gray
+        Write-Host "    2  Указать папку вручную, если Vencord уже есть" -ForegroundColor Gray
+        Write-Host "    0  Отмена" -ForegroundColor Gray
+        Write-Host ""
+
+        $choice = Read-Host "    Выбор"
+        if ($choice -eq "1" -or [string]::IsNullOrWhiteSpace($choice)) {
+            $cloned = Install-Vencord
+            if ($cloned) { Save-VencordPath $cloned }
+            return $cloned
+        }
+        if ($choice -ne "2") { return $null }
+    }
+
+    $picked = Select-FolderDialog "Выбери папку с исходниками Vencord"
+    if (-not $picked) { return $null }
+
+    if (-not (Test-VencordRoot $picked)) {
+        Stop-WithError "В '$picked' нет исходников Vencord. Нужна папка, внутри которой лежат package.json и src."
+    }
+
+    $found = (Resolve-Path $picked).Path
+    Write-Ok "Vencord: $found"
+    Save-VencordPath $found
+    return $found
 }
 
 function Get-PluginDir ($vencordPath) {
@@ -253,6 +394,8 @@ function Invoke-Install {
 
     Assert-BuildTools
     $vencord = Resolve-VencordPath -AllowClone
+    if (-not $vencord) { Write-Note "Отменено."; return }
+
     $pluginDir = Get-PluginDir $vencord
 
     Write-Step "Ставлю плагин в src\userplugins\$PluginName"
@@ -330,11 +473,19 @@ function Invoke-Update {
     Write-Host "  Обновление плагина $PluginName" -ForegroundColor White
 
     Assert-BuildTools
-    $vencord = Resolve-VencordPath
+    $vencord = Resolve-VencordPath -AllowClone
+    if (-not $vencord) { Write-Note "Отменено."; return }
+
     $pluginDir = Get-PluginDir $vencord
 
-    if (-not (Test-Path $pluginDir)) { Stop-WithError "Плагин не установлен: '$pluginDir' не существует." }
-    if (-not (Test-Path (Join-Path $pluginDir ".git"))) { Stop-WithError "'$pluginDir' не git-репозиторий, обновить нечем. Переустанови." }
+    if (-not (Test-Path $pluginDir) -or -not (Test-Path (Join-Path $pluginDir ".git"))) {
+        Write-Warn2 "Плагин ещё не установлен в эту папку Vencord."
+        if (-not (Confirm-Yes "Установить его сейчас?")) { Write-Note "Отменено."; return }
+
+        $script:VencordPath = $vencord
+        Invoke-Install
+        return
+    }
 
     Write-Step "Забираю свежую версию плагина"
     git -C $pluginDir pull --ff-only
@@ -367,6 +518,8 @@ function Invoke-Uninstall {
     if ($choice -notin @("1", "2", "3")) { Stop-WithError "Не понял выбор '$choice'." }
 
     $vencord = Resolve-VencordPath
+    if (-not $vencord) { Write-Note "Отменено."; return }
+
     $pluginDir = Get-PluginDir $vencord
 
     # --- сам плагин
@@ -410,6 +563,7 @@ function Invoke-Uninstall {
     if (Confirm-Yes "Точно удалить эту папку?") {
         Set-Location $HOME
         Remove-Item $vencord -Recurse -Force
+        Remove-Item $ConfigFile -Force -ErrorAction SilentlyContinue
         Write-Ok "Удалена"
     } else {
         Write-Note "Папка оставлена."
