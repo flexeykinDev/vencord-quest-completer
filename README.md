@@ -1,0 +1,110 @@
+# QuestCompleter
+
+Плагин для [Vencord](https://github.com/Vendicated/Vencord): кнопка в панели аккаунта, которая выполняет незавершённые квесты Discord.
+
+Работает как переключатель, по образцу штатного GameActivityToggle — иконка показывает состояние, в подсказке видно прогресс, повторное нажатие останавливает.
+
+## Что умеет
+
+| Тип задания | Как выполняется |
+| --- | --- |
+| `WATCH_VIDEO`, `WATCH_VIDEO_ON_MOBILE` | шлёт прогресс просмотра, отсчитывая реальное время |
+| `PLAY_ON_DESKTOP` | временно подменяет список запущенных игр |
+| `STREAM_ON_DESKTOP` | временно подменяет метаданные стрима |
+| `PLAY_ACTIVITY` | шлёт heartbeat в голосовой канал |
+
+Между запросами стоят рандомизированные задержки, между квестами — пауза 15–45 секунд.
+
+Все подменённые методы сторов возвращаются на место в `finally` — и при успехе, и при ошибке, и при остановке, и при выключении плагина.
+
+## Установка
+
+Нужны **Node.js 20+**, **git** и **pnpm**.
+
+### Авто
+
+Скрипт сам проверит инструменты, найдёт или склонирует Vencord, поставит плагин, соберёт и вживит Vencord в Discord.
+
+Если Vencord уже есть:
+
+```powershell
+gh repo clone flexeykinDev/vencord-quest-completer "$env:TEMP\qc"; & "$env:TEMP\qc\install.ps1"
+```
+
+На чистой машине — то же самое, скрипт сам предложит склонировать Vencord и спросит, куда.
+
+Полезные ключи:
+
+```powershell
+.\install.ps1 -VencordPath "D:\dev\Vencord"   # указать папку Vencord явно
+.\install.ps1 -SkipInject                     # не трогать установку Discord
+.\install.ps1 -Manual                         # напечатать инструкцию и выйти
+```
+
+Если PowerShell откажется запускать скрипт, разреши его для одной сессии:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+### Вручную
+
+```powershell
+npm i -g pnpm
+git clone https://github.com/Vendicated/Vencord
+cd Vencord
+pnpm i
+gh repo clone flexeykinDev/vencord-quest-completer src\userplugins\QuestCompleter
+pnpm build
+pnpm inject
+```
+
+Дальше запусти Discord, Ctrl+R, Настройки → Vencord → Plugins → включи `QuestCompleter`, ещё раз Ctrl+R.
+
+Папка `src/userplugins` прописана в `.gitignore` Vencord, поэтому её нет после клонирования — её создаёт установщик или ты сам.
+
+## Обновление
+
+```powershell
+git -C src\userplugins\QuestCompleter pull
+pnpm build
+```
+
+Дальше Ctrl+R в Discord.
+
+## Разработка
+
+```powershell
+pnpm watch        # пересборка при каждом сохранении
+pnpm testTsc      # проверка типов, esbuild их не проверяет
+```
+
+После каждой пересборки — Ctrl+R в Discord.
+
+## Если сломалось
+
+Плагин завязан на внутренности Discord, а они меняются с обновлениями.
+
+**Кнопка пропала из панели аккаунта.** Не прошёл патч. Открой DevTools (Ctrl+Shift+I) и поищи сообщение Vencord про неудавшийся патч. Кнопка вставляется по тому же якорю, что и штатный GameActivityToggle (`USER_PROFILE_ACCOUNT_POPOUT_BUTTON_A11Y_LABEL`), и окно поиска в регулярке специально расширено, чтобы оба плагина уживались.
+
+**Всплывашка «Не нашёл QuestsStore».** Изменились сигнатуры сторов. Стора ищутся не по именам (в реестре Flux квестов под ожидаемым именем нет), а по набору методов — см. `getStore` в начале `index.tsx`.
+
+**Vencord пропал после обновления Discord.** Слетел инжект, плагин тут ни при чём:
+
+```powershell
+pnpm inject
+```
+
+## Логи
+
+Всё пишется в консоль DevTools с префиксом `[Vencord] [QuestCompleter]`:
+
+```
+[Vencord] [QuestCompleter] Найден QuestsStore
+[Vencord] [QuestCompleter] Начинаю квест: Название (PLAY_ON_DESKTOP)
+[Vencord] [QuestCompleter] Прогресс: 119/900
+```
+
+## Оговорка
+
+Плагин подделывает прогресс квестов. Это нарушает пользовательское соглашение Discord, награды иногда отзывают. Используешь на свой риск.
