@@ -316,8 +316,12 @@ function Resolve-VencordPath ([switch] $AllowClone) {
         return $found
     }
 
-    # 2. Скрипт лежит внутри уже установленного плагина
-    $maybeRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..") -ErrorAction SilentlyContinue
+    # 2. Скрипт лежит внутри уже установленного плагина.
+    # $PSScriptRoot пуст, если скрипт запустили не из файла, отсюда проверка.
+    $maybeRoot = $null
+    if ($PSScriptRoot) {
+        $maybeRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..") -ErrorAction SilentlyContinue
+    }
     if ($maybeRoot -and (Test-VencordRoot $maybeRoot.Path)) {
         Write-Note "Скрипт запущен изнутри установленного плагина."
         Write-Ok "Vencord: $($maybeRoot.Path)"
@@ -426,13 +430,7 @@ function Invoke-Install {
     if (-not (Test-Path $pluginDir)) {
         New-Item -ItemType Directory -Force (Split-Path $pluginDir) | Out-Null
 
-        if (Test-Tool "gh") {
-            gh repo clone $RepoSlug $pluginDir
-        } else {
-            Write-Note "gh не найден, беру обычным git. Репозиторий приватный, могут спросить логин."
-            git clone $RepoUrl $pluginDir
-        }
-
+        git clone $RepoUrl $pluginDir
         if ($LASTEXITCODE -ne 0) { Stop-WithError "Не удалось скачать плагин." }
     }
 
@@ -611,10 +609,6 @@ function Invoke-Manual {
 
     3. Положи плагин в папку пользовательских плагинов. Её нет после
        клонирования, потому что она в .gitignore самого Vencord:
-
-         gh repo clone $RepoSlug src\userplugins\$PluginName
-
-       Без gh, обычным git:
 
          git clone $RepoUrl src\userplugins\$PluginName
 

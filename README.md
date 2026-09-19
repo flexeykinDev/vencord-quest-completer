@@ -15,15 +15,15 @@
 
 ## Установка
 
-Скачай репозиторий и запусти установщик. Он покажет меню: поставить, обновить, удалить.
+Открой PowerShell и вставь одну строку. Установщик покажет меню: поставить, обновить, удалить.
 
 ```powershell
-$d="$env:TEMP\qc"; if (Test-Path $d) { Remove-Item $d -Recurse -Force }; gh repo clone flexeykinDev/vencord-quest-completer $d; powershell -NoProfile -ExecutionPolicy Bypass -File "$d\setup.ps1"
+$s="$env:TEMP\qc-setup.ps1"; irm https://raw.githubusercontent.com/flexeykinDev/vencord-quest-completer/main/setup.ps1 -OutFile $s; powershell -NoProfile -ExecutionPolicy Bypass -File $s
 ```
 
-Ставить что-либо заранее не нужно. Чего не хватает для сборки, скрипт предложит доставить через `winget`, встроенный в Windows 11. Про каждый инструмент спрашивает отдельно, молча ничего не ставит.
+Ставить что-либо заранее не нужно, даже Git. Чего не хватает для сборки, скрипт предложит доставить через `winget`, встроенный в Windows 11. Про каждый инструмент спрашивает отдельно, молча ничего не ставит. Папку Vencord тоже ищет сам.
 
-Если репозиторий уже скачан, достаточно **двойного клика по `setup.cmd`**. Это обёртка, которая запускает `setup.ps1` в обход ExecutionPolicy, не меняя настройки самой системы.
+Если репозиторий уже скачан, достаточно **двойного клика по `setup.cmd`**.
 
 По умолчанию Windows не даёт запускать скачанные скрипты. Поэтому и в команде выше, и в `setup.cmd` стоит `-ExecutionPolicy Bypass`: он действует только на один запущенный процесс. Менять политику машины через `Set-ExecutionPolicy` не нужно.
 
@@ -50,7 +50,7 @@ npm i -g pnpm
 git clone https://github.com/Vendicated/Vencord
 cd Vencord
 pnpm i
-gh repo clone flexeykinDev/vencord-quest-completer src\userplugins\QuestCompleter
+git clone https://github.com/flexeykinDev/vencord-quest-completer src\userplugins\QuestCompleter
 pnpm build
 pnpm inject
 ```
