@@ -23,7 +23,35 @@ $s="$env:TEMP\qc-setup.ps1"; irm https://raw.githubusercontent.com/flexeykinDev/
 
 Ставить что-либо заранее не нужно, даже Git. Чего не хватает для сборки, скрипт предложит доставить через `winget`, встроенный в Windows 11. Про каждый инструмент спрашивает отдельно, молча ничего не ставит. Папку Vencord тоже ищет сам.
 
-Если репозиторий уже скачан, достаточно **двойного клика по `setup.cmd`**.
+### Без командной строки
+
+В [релизах](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest) лежит архив. Скачай, распакуй и запусти двойным кликом:
+
+| Файл | Что делает |
+| --- | --- |
+| `install.cmd` | сразу ставит |
+| `uninstall.cmd` | сразу удаляет |
+| `setup.cmd` | показывает меню |
+
+## Удаление
+
+Тем же установщиком, пункт 3 в меню. Или сразу:
+
+```powershell
+$s="$env:TEMP\qc-setup.ps1"; irm https://raw.githubusercontent.com/flexeykinDev/vencord-quest-completer/main/setup.ps1 -OutFile $s; powershell -NoProfile -ExecutionPolicy Bypass -File $s -Action Uninstall
+```
+
+Спросит, до какой степени резать:
+
+| Вариант | Что убирает |
+| --- | --- |
+| 1 | только плагин, Vencord и остальные плагины остаются |
+| 2 | плагин и Vencord из Discord, клиент возвращается в исходный вид |
+| 3 | всё, включая папку с исходниками и инструменты сборки |
+
+Каждый разрушительный шаг подтверждается отдельно.
+
+## Про запуск скриптов
 
 По умолчанию Windows не даёт запускать скачанные скрипты. Поэтому и в команде выше, и в `setup.cmd` стоит `-ExecutionPolicy Bypass`: он действует только на один запущенный процесс. Менять политику машины через `Set-ExecutionPolicy` не нужно.
 
