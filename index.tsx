@@ -39,6 +39,15 @@ export default definePlugin({
             }
         },
         {
+            // Сам компонент баннера. Патч стора выше убирает только рекламу,
+            // а у этого места есть ещё и дефолтное содержимое про орбы.
+            find: "\"quest-home-hero-banner\"",
+            replacement: {
+                match: /(?=let\{adContentId:\i,topContent:\i,[^}]*\}=\i,)/,
+                replace: "if($self.shouldHideSponsoredBanner())return null;"
+            }
+        },
+        {
             // То же место, что у GameActivityToggle. Окно поиска шире, чтобы
             // патч прошёл, даже если тот плагин вставил свою кнопку раньше.
             find: "#{intl::USER_PROFILE_ACCOUNT_POPOUT_BUTTON_A11Y_LABEL}",

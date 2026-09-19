@@ -45,7 +45,7 @@ export const settings = definePluginSettings({
     },
     hideSponsoredBanner: {
         type: OptionType.BOOLEAN,
-        description: "Скрывать спонсорский баннер и ряд карточек под ним",
+        description: "Скрывать баннер сверху страницы Quests и ряд карточек под ним",
         default: true
     }
 });
