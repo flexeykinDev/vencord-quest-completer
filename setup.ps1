@@ -387,6 +387,40 @@ function Resolve-VencordPath ([switch] $AllowClone) {
     return $found
 }
 
+<#
+    Сборка может быть свежей, но Discord при этом грузить чужой Vencord:
+    официальную установку или другую папку. Тогда плагина в списке не будет,
+    и причина совершенно неочевидна.
+#>
+function Confirm-Injected ($vencord) {
+    if ($SkipInject) { return }
+
+    Write-Step "Проверяю, подключён ли Discord к этой сборке"
+
+    $injected = Find-VencordFromDiscord
+    $here = $vencord.TrimEnd('\')
+
+    if ($injected -and $injected.TrimEnd('\') -ieq $here) {
+        Write-Ok "Подключён"
+        return
+    }
+
+    if ($injected) {
+        Write-Warn2 "Discord подключён к другой папке: $injected"
+    } else {
+        Write-Warn2 "Discord вообще не подключён к Vencord, плагина в списке не будет."
+    }
+
+    if (-not (Confirm-Yes "Подключить Discord к этой сборке?")) {
+        Write-Note "Оставил как есть. Плагин появится только после подключения."
+        return
+    }
+
+    Stop-DiscordIfRunning
+    Invoke-In $vencord "pnpm" @("inject")
+    Write-Ok "Подключено, Discord нужно запустить заново"
+}
+
 function Get-PluginDir ($vencordPath) {
     return (Join-Path $vencordPath "src\userplugins\$PluginName")
 }
@@ -492,6 +526,8 @@ function Invoke-Update {
     Write-Step "Пересобираю Vencord"
     Invoke-In $vencord "pnpm" @("i")
     Invoke-In $vencord "pnpm" @("build")
+
+    Confirm-Injected $vencord
 
     Write-Host ""
     Write-Host "  Готово. Нажми Ctrl+R в Discord." -ForegroundColor Green
