@@ -6,12 +6,27 @@
 
 import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
-import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, showToast, Toasts, useEffect } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, showToast, useEffect } from "@webpack/common";
 
 import { getQuestsStore, getRunningGameStore, getStreamingStore, RunningGame } from "./stores";
 import { getExpiresAt, getSupportedTask, getTaskConfig, Quest, TaskName } from "./types";
 
 const logger = new Logger("QuestCompleter");
+
+/**
+ * Toasts у Vencord ищется мангленным поиском и отваливается при обновлениях
+ * Discord, утаскивая за собой showToast. Всплывашка не стоит того, чтобы из-за
+ * неё падал запуск квестов, поэтому все сообщения идут через эту обёртку.
+ */
+function notify(message: string, type: "message" | "success" | "failure" = "message") {
+    logger.info(message);
+
+    try {
+        showToast(message, type);
+    } catch (err) {
+        logger.warn("Всплывашка не показалась, Discord сменил внутренности", err);
+    }
+}
 
 /** Отмена, а не сбой: отличается от настоящих ошибок при разборе в catch */
 class Aborted extends Error { }
@@ -288,11 +303,11 @@ export async function startQuests() {
         const quests = getPendingQuests();
 
         if (quests.length === 0) {
-            showToast("Нет незавершённых квестов", Toasts.Type.MESSAGE);
+            notify("Нет незавершённых квестов");
             return;
         }
 
-        showToast(`Запускаю квесты: ${quests.length}`, Toasts.Type.MESSAGE);
+        notify(`Запускаю квесты: ${quests.length}`);
 
         for (let i = 0; i < quests.length; i++) {
             setState({ isRunning: true, statusText: `квест ${i + 1} из ${quests.length}` });
@@ -305,13 +320,13 @@ export async function startQuests() {
             }
         }
 
-        showToast("Все квесты выполнены", Toasts.Type.SUCCESS);
+        notify("Все квесты выполнены", "success");
     } catch (err) {
         if (err instanceof Aborted) {
-            showToast("Остановлено", Toasts.Type.MESSAGE);
+            notify("Остановлено");
         } else {
             logger.error(err);
-            showToast(err instanceof Error ? err.message : "Ошибка, смотри консоль", Toasts.Type.FAILURE);
+            notify(err instanceof Error ? err.message : "Ошибка, смотри консоль", "failure");
         }
     } finally {
         controller = null;
