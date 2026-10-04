@@ -6,6 +6,7 @@
 
 import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
+import { PluginNative } from "@utils/types";
 import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, showToast, useEffect } from "@webpack/common";
 
 import { settings } from "./settings";
@@ -13,6 +14,8 @@ import { getQuestsStore, getRunningGameStore, getStreamingStore, RunningGame } f
 import { getExpiresAt, getSupportedTask, getTaskConfig, Quest, TaskName } from "./types";
 
 const logger = new Logger("QuestCompleter");
+
+const Native = VencordNative.pluginHelpers.QuestCompleter as PluginNative<typeof import("./native")>;
 
 /**
  * Toasts у Vencord ищется мангленным поиском и отваливается при обновлениях
@@ -343,6 +346,105 @@ async function acceptAvailableQuests(signal: AbortSignal) {
     await sleep(3000, 1000, signal);
 }
 
+// ---------------------------------------------------------------- квесты на достижения
+
+const ACHIEVEMENT_SCOPES = "identify applications.commands applications.entitlements";
+
+async function listGrantIds(): Promise<Set<string>> {
+    try {
+        const res = await RestAPI.get({ url: "/oauth2/tokens" });
+        return new Set<string>((res.body ?? []).map((grant: any) => grant.id));
+    } catch {
+        return new Set();
+    }
+}
+
+/** Отзывает доступ, выданный по ходу обхода, чтобы приложение не осталось висеть на аккаунте */
+async function revokeNewGrants(before: Set<string>) {
+    try {
+        const res = await RestAPI.get({ url: "/oauth2/tokens" });
+
+        for (const grant of res.body ?? []) {
+            if (before.has(grant.id)) continue;
+
+            await RestAPI.del({ url: `/oauth2/tokens/${grant.id}` }).catch(() => { });
+            logger.info("Отозван доступ приложения, выданный для квеста");
+        }
+    } catch (err) {
+        logger.error("Не смог отозвать доступ приложения. Проверь Настройки, Авторизованные приложения", err);
+    }
+}
+
+/**
+ * Такие квесты не берут подделку heartbeat: Discord ждёт, что активность сама
+ * подтвердит прогресс. Обход проходит настоящую авторизацию OAuth, то есть
+ * выдаёт приложению игры доступ к аккаунту, и поэтому выключен по умолчанию.
+ * Доступ отзывается в finally при любом исходе, включая остановку кнопкой.
+ */
+async function runAchievementInActivity(quest: Quest, applicationId: string, target: number, signal: AbortSignal) {
+    if (!settings.store.achievementBypass) {
+        throw new Error("Квест на достижение пропущен: обход выключен в настройках");
+    }
+
+    const grantsBefore = await listGrantIds();
+
+    try {
+        const authRes = await RestAPI.post({
+            url: "/oauth2/authorize",
+            query: {
+                response_type: "code",
+                client_id: applicationId,
+                scope: ACHIEVEMENT_SCOPES
+            },
+            body: {
+                permissions: "0",
+                authorize: true,
+                integration_type: 1,
+                location_context: { guild_id: "10000", channel_id: "10000", channel_type: 10000 }
+            }
+        });
+
+        const code = authRes.body?.location
+            ? new URL(authRes.body.location).searchParams.get("code")
+            : null;
+        if (!code) throw new Error("Discord не вернул код авторизации");
+
+        const ticketRes = await RestAPI.post({ url: `/applications/${applicationId}/proxy-tickets`, body: {} });
+        const ticket = ticketRes.body?.ticket;
+        if (!ticket) throw new Error("Discord не выдал proxy-ticket");
+
+        const referrer = `https://${applicationId}.discordsays.com/?instance_id=example-cl-instance&platform=desktop&discord_proxy_ticket=${ticket}`;
+
+        const auth = await Native.discordsaysAuthorize({ appId: applicationId, questId: quest.id, referrer, code });
+        if (!auth.ok || !auth.body?.token) throw new Error(`Активность не авторизовала нас (статус ${auth.status})`);
+
+        let done = 0;
+
+        while (done < target) {
+            if (signal.aborted) throw new Aborted();
+
+            done = Math.min(target, done + 30 + Math.floor(Math.random() * 20));
+
+            const res = await Native.discordsaysProgress({
+                appId: applicationId,
+                questId: quest.id,
+                referrer,
+                token: auth.body.token,
+                progress: done
+            });
+
+            if (!res.ok) throw new Error(`Прогресс не принят (статус ${res.status})`);
+
+            setState({ isRunning: true, statusText: `${done}/${target}` });
+            logger.info(`Достижение: ${done}/${target}`);
+
+            if (done < target) await sleep(18000, 4000, signal);
+        }
+    } finally {
+        await revokeNewGrants(grantsBefore);
+    }
+}
+
 // ---------------------------------------------------------------- оркестрация
 
 function getPendingQuests(): Quest[] {
@@ -387,6 +489,10 @@ async function completeQuest(quest: Quest, signal: AbortSignal) {
 
         case "PLAY_ACTIVITY":
             await runPlayActivity(quest, secondsNeeded, signal);
+            break;
+
+        case "ACHIEVEMENT_IN_ACTIVITY":
+            await runAchievementInActivity(quest, applicationId!, secondsNeeded, signal);
             break;
     }
 

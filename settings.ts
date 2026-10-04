@@ -18,6 +18,11 @@ export const settings = definePluginSettings({
         description: "Сначала принимать все доступные квесты, потом выполнять",
         default: false
     },
+    achievementBypass: {
+        type: OptionType.BOOLEAN,
+        description: "Квесты на достижения. ВНИМАНИЕ: выдаёт приложению игры доступ к аккаунту через OAuth. Доступ отзывается сразу после квеста, но риск выше, чем у обычной подделки прогресса",
+        default: false
+    },
     filterQuestList: {
         type: OptionType.BOOLEAN,
         description: "Фильтровать список квестов на странице Quests",

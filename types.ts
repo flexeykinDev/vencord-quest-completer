@@ -9,7 +9,8 @@ export const SUPPORTED_TASKS = [
     "PLAY_ON_DESKTOP",
     "STREAM_ON_DESKTOP",
     "PLAY_ACTIVITY",
-    "WATCH_VIDEO_ON_MOBILE"
+    "WATCH_VIDEO_ON_MOBILE",
+    "ACHIEVEMENT_IN_ACTIVITY"
 ] as const;
 
 export type TaskName = typeof SUPPORTED_TASKS[number];
