@@ -8,6 +8,7 @@ import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
 import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, showToast, useEffect } from "@webpack/common";
 
+import { settings } from "./settings";
 import { getQuestsStore, getRunningGameStore, getStreamingStore, RunningGame } from "./stores";
 import { getExpiresAt, getSupportedTask, getTaskConfig, Quest, TaskName } from "./types";
 
@@ -126,25 +127,44 @@ function waitForHeartbeatProgress(quest: Quest, task: TaskName, secondsNeeded: n
 
 // ---------------------------------------------------------------- задания
 
+/** На сколько секунд прогрессу позволено обгонять реальное время */
+const MAX_SECONDS_AHEAD = 10;
+
+/**
+ * Якорь отсчёта: момент принятия квеста. Так прогресс не уходит вперёд реального
+ * времени, даже если квест принят давно и уже набрал часть секунд. Если
+ * enrolledAt почему-то нет, считаем, что квест приняли initialProgress секунд
+ * назад: набранное сохраняется, а дальше всё равно идёт в реальном темпе.
+ */
+function getProgressAnchor(quest: Quest, initialProgress: number) {
+    const raw = quest.userStatus?.enrolledAt;
+    const enrolledAt = raw != null ? new Date(raw).getTime() : Number.NaN;
+
+    return Number.isNaN(enrolledAt) ? Date.now() - initialProgress * 1000 : enrolledAt;
+}
+
 async function runWatchVideo(quest: Quest, secondsNeeded: number, initialProgress: number, signal: AbortSignal) {
-    const startedAt = Date.now();
+    const anchor = getProgressAnchor(quest, initialProgress);
     let completed = false;
     let secondsDone = initialProgress;
 
     while (true) {
         await sleep(7000, 4000, signal);
 
-        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-        secondsDone = Math.min(secondsNeeded, initialProgress + elapsed);
+        const maxAllowed = Math.floor((Date.now() - anchor) / 1000) + MAX_SECONDS_AHEAD;
+        const next = Math.min(secondsNeeded, secondsDone + 7, maxAllowed);
 
-        const res = await RestAPI.post({
-            url: `/quests/${quest.id}/video-progress`,
-            body: { timestamp: secondsDone }
-        });
+        if (next > secondsDone) {
+            const res = await RestAPI.post({
+                url: `/quests/${quest.id}/video-progress`,
+                body: { timestamp: next }
+            });
 
-        completed = res.body.completed_at != null;
-        setState({ isRunning: true, statusText: `${secondsDone}/${secondsNeeded}` });
-        logger.info(`Видео: ${secondsDone}/${secondsNeeded}`);
+            completed = res.body.completed_at != null;
+            secondsDone = next;
+            setState({ isRunning: true, statusText: `${secondsDone}/${secondsNeeded}` });
+            logger.info(`Видео: ${secondsDone}/${secondsNeeded}`);
+        }
 
         if (secondsDone >= secondsNeeded || completed) break;
     }
@@ -243,6 +263,86 @@ async function runPlayActivity(quest: Quest, secondsNeeded: number, signal: Abor
     }
 }
 
+// ---------------------------------------------------------------- принятие квестов
+
+function retryAfterMs(body: any) {
+    return ((Number(body?.retry_after) || 5) + 1) * 1000;
+}
+
+/** Принимает квест. 429 тут обычное дело, Discord сам говорит, сколько ждать */
+async function enrollQuest(quest: Quest, signal: AbortSignal): Promise<boolean> {
+    const { questName } = quest.config.messages;
+    const MAX_ATTEMPTS = 3;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        try {
+            const res = await RestAPI.post({
+                url: `/quests/${quest.id}/enroll`,
+                body: {
+                    location: 11,
+                    is_targeted: false,
+                    metadata_raw: null,
+                    metadata_sealed: null,
+                    traffic_metadata_raw: null
+                }
+            });
+
+            if (res?.status === 429) {
+                if (attempt === MAX_ATTEMPTS) break;
+                await sleep(retryAfterMs(res.body), 0, signal);
+                continue;
+            }
+
+            logger.info(`Принят квест: ${questName}`);
+            return true;
+        } catch (err: any) {
+            if (err instanceof Aborted) throw err;
+
+            const status = err?.status ?? err?.res?.status ?? 0;
+            const body = err?.body ?? err?.res?.body ?? {};
+
+            if (status === 429 && attempt < MAX_ATTEMPTS) {
+                await sleep(retryAfterMs(body), 0, signal);
+                continue;
+            }
+
+            logger.error(`Не смог принять "${questName}" (статус ${status})`, body?.message ?? err);
+            return false;
+        }
+    }
+
+    logger.warn(`Сдался с принятием "${questName}": Discord держит лимит`);
+    return false;
+}
+
+function getAcceptableQuests(): Quest[] {
+    const now = Date.now();
+
+    return [...getQuestsStore().quests.values()].filter(quest => {
+        const expiresAt = getExpiresAt(quest);
+
+        return quest.userStatus?.enrolledAt == null
+            && expiresAt != null && expiresAt > now
+            && getSupportedTask(quest) != null;
+    });
+}
+
+async function acceptAvailableQuests(signal: AbortSignal) {
+    const quests = getAcceptableQuests();
+    if (quests.length === 0) return;
+
+    setState({ isRunning: true, statusText: "принимаю квесты" });
+    notify(`Принимаю квесты: ${quests.length}`);
+
+    for (const quest of quests) {
+        await enrollQuest(quest, signal);
+        await sleep(2000, 1500, signal);
+    }
+
+    // стор обновляется ответом Discord, даём ему дойти до нас
+    await sleep(3000, 1000, signal);
+}
+
 // ---------------------------------------------------------------- оркестрация
 
 function getPendingQuests(): Quest[] {
@@ -300,6 +400,10 @@ export async function startQuests() {
     const { signal } = controller;
 
     try {
+        if (settings.store.autoAcceptQuests) {
+            await acceptAvailableQuests(signal);
+        }
+
         const quests = getPendingQuests();
 
         if (quests.length === 0) {

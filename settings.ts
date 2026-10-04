@@ -13,6 +13,11 @@ import hideHeroStyle from "./hideHero.css?managed";
 export { hideHeroStyle };
 
 export const settings = definePluginSettings({
+    autoAcceptQuests: {
+        type: OptionType.BOOLEAN,
+        description: "Сначала принимать все доступные квесты, потом выполнять",
+        default: false
+    },
     filterQuestList: {
         type: OptionType.BOOLEAN,
         description: "Фильтровать список квестов на странице Quests",
