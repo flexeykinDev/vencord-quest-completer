@@ -9,7 +9,7 @@
 <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4" alt="Windows 10 и 11">
 <img src="https://img.shields.io/badge/установщик-PowerShell-5391FE" alt="Установщик на PowerShell">
 <img src="https://img.shields.io/badge/лицензия-GPL--3.0-blue" alt="Лицензия GPL-3.0">
-<a href="https://www.virustotal.com/gui/file/e54aa8a2dbdf1d9e1aa0b9279749c447389048c8c53562eccfd5c82e9bddab7d/detection"><img src="https://img.shields.io/badge/VirusTotal-0%20%2F%2062-2ea043" alt="VirusTotal: 0 детектов из 62"></a>
+<a href="https://www.virustotal.com/gui/file/f82452a0e8bd8a13e4b93879657f268f9d2793bb072b215f36ad096a9b1e4913/detection"><img src="https://img.shields.io/badge/VirusTotal-проверить_по_хешу-394EFF" alt="Проверить на VirusTotal"></a>
 </p>
 
 </div>
@@ -223,21 +223,23 @@ Object.keys(m).filter(id => m[id][SYM_PATCHED_BY]?.has?.("QuestCompleter"));
 
 ## Проверка файлов
 
-Скрипт из релиза скачивается из интернета и что-то ставит, поэтому проверить его это нормальное желание. Ниже хеши файлов версии 1.0.0 и ссылки на VirusTotal.
+Скрипт из релиза скачивается из интернета и что-то ставит, поэтому проверить его это нормальное желание. Ниже хеши файлов версии 1.1.0 и ссылки на VirusTotal.
 
 | Файл | SHA-256 | Детектов |
 | --- | --- | --- |
-| `setup.ps1` | `e54aa8a2…ddab7d` | [**0 из 62**](https://www.virustotal.com/gui/file/e54aa8a2dbdf1d9e1aa0b9279749c447389048c8c53562eccfd5c82e9bddab7d/detection) |
-| `QuestCompleter-1.0.0.zip` | `72998f70…de6cba` | [**0 из 65**](https://www.virustotal.com/gui/file/72998f7007df39bc9b74744297c475f6a22515daa5ec664b7e45433273de6cba/detection) |
+| `setup.ps1` | `f82452a0…e4913` | [проверить](https://www.virustotal.com/gui/file/f82452a0e8bd8a13e4b93879657f268f9d2793bb072b215f36ad096a9b1e4913/detection) |
 | `setup.cmd` | `3adb96ca…b87df7` | [**0 из 61**](https://www.virustotal.com/gui/file/3adb96cac1a8d18b86210fa9bebd49dfb39c4fa23a823805c3a557db79b87df7/detection) |
 | `install.cmd` | `905af63d…0d0631` | [**0 из 60**](https://www.virustotal.com/gui/file/905af63d61fa85dd63a435b0c58a77f49c1a0e6ce71c4bf9b80c06a8260d0631/detection) |
 | `uninstall.cmd` | `03db09a1…88db1f` | [**0 из 61**](https://www.virustotal.com/gui/file/03db09a11f612170ebd64cba36461262fb9f182e4d5cb76d22a7ddfe5d88db1f/detection) |
+| `QuestCompleter-1.1.0.zip` | хеш на [странице релиза](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest) | |
 
-Проверено 19 сентября 2026: ни один антивирус не отметил ни один файл. Разное число в знаменателе это нормально, VirusTotal гоняет разный набор движков в зависимости от типа файла.
+Три `.cmd` с версии 1.0.0 не менялись, поэтому их проверки от 19 сентября 2026 остаются в силе: ни один антивирус ничего не нашёл. Разное число в знаменателе это нормально, VirusTotal гоняет разный набор движков в зависимости от типа файла.
 
-Ссылки ведут на живые отчёты, там всегда актуальные цифры. Числа относятся к версии 1.0.0: у следующей версии будут другие хеши и другие ссылки.
+`setup.ps1` в 1.1.0 изменился, у него новый хеш и новый отчёт. Ссылки ведут на живые отчёты, там всегда актуальные цифры.
 
-Важно: таблица описывает файлы **из релиза**. Команда установки качает `setup.ps1` из ветки `main`, а она с тех пор ушла вперёд, так что его хеш с таблицей уже не сойдётся. Сверять по хешам имеет смысл то, что скачано со страницы релиза.
+Хеш архива живёт на странице релиза, а не здесь: архив содержит этот же README, и вписать его собственный хеш внутрь него самого невозможно.
+
+Таблица описывает файлы **из релиза**. Команда установки качает `setup.ps1` из ветки `main`, и между релизами она уходит вперёд, так что хеш может не сойтись. Сверять по хешам имеет смысл то, что скачано со страницы релиза.
 
 Сверить скачанный файл со списком:
 
