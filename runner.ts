@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { showNotification } from "@api/Notifications";
 import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
 import { PluginNative } from "@utils/types";
-import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, showToast, useEffect } from "@webpack/common";
+import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, useEffect } from "@webpack/common";
 
 import { settings } from "./settings";
 import { getQuestsStore, getRunningGameStore, getStreamingStore, RunningGame } from "./stores";
@@ -17,18 +18,30 @@ const logger = new Logger("QuestCompleter");
 
 const Native = VencordNative.pluginHelpers.QuestCompleter as PluginNative<typeof import("./native")>;
 
+const NOTIFICATION_COLORS = {
+    message: undefined,
+    success: "var(--status-positive)",
+    failure: "var(--status-danger)"
+} as const;
+
 /**
- * Toasts у Vencord ищется мангленным поиском и отваливается при обновлениях
- * Discord, утаскивая за собой showToast. Всплывашка не стоит того, чтобы из-за
- * неё падал запуск квестов, поэтому все сообщения идут через эту обёртку.
+ * Намеренно не showToast: тосты Discord ищутся мангленным поиском и уже дважды
+ * ломались при его обновлениях, в последний раз роняя весь клиент через React.
+ * Уведомления Vencord рисует своим компонентом, от внутренностей Discord они не
+ * зависят. Логи дублируются в консоль, и ни один сбой показа не трогает квесты.
  */
 function notify(message: string, type: "message" | "success" | "failure" = "message") {
     logger.info(message);
 
     try {
-        showToast(message, type);
+        showNotification({
+            title: "QuestCompleter",
+            body: message,
+            color: NOTIFICATION_COLORS[type],
+            noPersist: true
+        }).catch(err => logger.warn("Уведомление не показалось", err));
     } catch (err) {
-        logger.warn("Всплывашка не показалась, Discord сменил внутренности", err);
+        logger.warn("Уведомление не показалось", err);
     }
 }
 
