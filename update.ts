@@ -12,7 +12,7 @@ import { settings } from "./settings";
 const logger = new Logger("QuestCompleter");
 
 /** Держать в курсе с тегом релиза на GitHub */
-export const VERSION = "1.1.0";
+export const VERSION = "1.1.1";
 
 const REPO = "flexeykinDev/vencord-quest-completer";
 const LATEST_RELEASE = `https://api.github.com/repos/${REPO}/releases/latest`;
