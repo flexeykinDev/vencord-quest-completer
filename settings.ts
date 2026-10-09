@@ -13,6 +13,17 @@ import hideHeroStyle from "./hideHero.css?managed";
 export { hideHeroStyle };
 
 export const settings = definePluginSettings({
+    checkForUpdates: {
+        type: OptionType.BOOLEAN,
+        description: "Проверять обновления плагина на GitHub, не чаще раза в шесть часов",
+        default: true
+    },
+    lastUpdateCheck: {
+        type: OptionType.NUMBER,
+        description: "Время последней проверки обновлений",
+        default: 0,
+        hidden: true
+    },
     autoAcceptQuests: {
         type: OptionType.BOOLEAN,
         description: "Сначала принимать все доступные квесты, потом выполнять",

@@ -12,10 +12,11 @@ import { shouldHideQuest, shouldHideSponsoredBanner } from "./filter";
 import { QuestButton } from "./QuestButton";
 import { stopQuests } from "./runner";
 import { hideHeroStyle, settings } from "./settings";
+import { scheduleUpdateCheck, VERSION } from "./update";
 
 export default definePlugin({
     name: "QuestCompleter",
-    description: "Кнопка рядом с микрофоном: выполняет незавершённые квесты Discord. Плюс фильтр списка квестов и скрытие рекламного баннера.",
+    description: `Кнопка рядом с микрофоном: выполняет незавершённые квесты Discord. Плюс фильтр списка квестов и скрытие рекламного баннера. Версия ${VERSION}`,
     authors: [{ name: "flexeykin", id: 0n }],
     settings,
 
@@ -61,6 +62,7 @@ export default definePlugin({
 
     start() {
         if (settings.store.hideSponsoredBanner) enableStyle(hideHeroStyle);
+        scheduleUpdateCheck();
     },
 
     stop() {
