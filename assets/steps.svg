@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="240" viewBox="0 0 880 240" role="img" aria-label="Три шага установки">
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0" />
+    </filter>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4ddb8a" stop-opacity="0.9" />
+      <stop offset="1" stop-color="#4ddb8a" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect width="880" height="240" fill="#09090b" />
+  <g><rect x="718" y="149" width="2" height="2" fill="#2f9c63" opacity="0.5" /><rect x="390" y="221" width="2" height="2" fill="#2c2c33" opacity="0.5" /><rect x="257" y="177" width="2" height="2" fill="#2c2c33" opacity="0.5" /><rect x="105" y="24" width="2" height="2" fill="#2f9c63" opacity="0.8" /><rect x="357" y="44" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="360" y="96" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="57" y="202" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="868" y="47" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="523" y="147" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="344" y="81" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="106" y="163" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="826" y="147" width="2" height="2" fill="#2c2c33" opacity="0.5" /><rect x="809" y="131" width="2" height="2" fill="#2c2c33" opacity="0.5" /><rect x="377" y="169" width="2" height="2" fill="#2f9c63" opacity="0.8" /><rect x="574" y="9" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="820" y="91" width="2" height="2" fill="#2f9c63" opacity="0.5" /><rect x="504" y="132" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="650" y="4" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="8" y="218" width="2" height="2" fill="#2f9c63" opacity="0.8" /><rect x="817" y="15" width="2" height="2" fill="#2f9c63" opacity="0.8" /><rect x="739" y="49" width="2" height="2" fill="#2f9c63" opacity="0.8" /><rect x="574" y="96" width="2" height="2" fill="#2c2c33" opacity="0.5" /><rect x="475" y="192" width="2" height="2" fill="#2c2c33" opacity="0.8" /><rect x="400" y="44" width="2" height="2" fill="#2c2c33" opacity="0.5" /><rect x="245" y="167" width="2" height="2" fill="#2f9c63" opacity="0.8" /><rect x="871" y="230" width="2" height="2" fill="#2c2c33" opacity="0.8" /></g>
+    <rect width="880" height="240" filter="url(#grain)" opacity="0.1" style="mix-blend-mode:overlay" />
+  <polygon points="12,26 15,26 15,23 18,23 18,20 278,20 278,23 281,23 281,26 284,26 284,182 281,182 281,185 278,185 278,188 18,188 18,185 15,185 15,182 12,182" fill="#2a2a31" />
+    <polygon points="13,27 16,27 16,24 19,24 19,21 277,21 277,24 280,24 280,27 283,27 283,181 280,181 280,184 277,184 277,187 19,187 19,184 16,184 16,181 13,181" fill="#0f0f12" />
+  <rect x="32" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="37" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="42" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="47" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="52" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="32" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="37" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="42" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="47" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="52" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="32" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="37" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="42" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="47" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="52" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="32" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="37" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="42" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="47" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="52" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="32" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="37" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="42" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="47" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="52" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="32" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="37" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="42" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="47" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="52" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="32" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="37" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="42" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="47" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="52" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="61" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="66" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="71" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="76" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="81" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="61" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="66" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="71" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="76" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="81" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="61" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="66" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="71" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="76" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="81" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="61" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="66" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="71" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="76" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="81" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="61" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="66" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="71" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="76" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="81" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="61" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="66" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="71" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="76" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="81" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="61" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="66" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="71" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="76" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="81" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+  <rect x="32" y="86" width="5" height="5" fill="#4ddb8a" />
+  <text x="45" y="91" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="17" font-weight="700" fill="#ececf1">Поставить</text>
+  <text x="32" y="134" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#85858f">Одна строка в PowerShell.</text>
+  <text x="32" y="153" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#85858f">Ни Node, ни Git заранее не нужны.</text>
+  <polygon points="304,26 307,26 307,23 310,23 310,20 570,20 570,23 573,23 573,26 576,26 576,182 573,182 573,185 570,185 570,188 310,188 310,185 307,185 307,182 304,182" fill="#2a2a31" />
+    <polygon points="305,27 308,27 308,24 311,24 311,21 569,21 569,24 572,24 572,27 575,27 575,181 572,181 572,184 569,184 569,187 311,187 311,184 308,184 308,181 305,181" fill="#0f0f12" />
+  <rect x="324" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="329" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="334" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="339" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="344" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="324" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="329" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="334" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="339" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="344" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="324" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="329" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="334" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="339" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="344" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="324" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="329" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="334" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="339" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="344" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="324" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="329" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="334" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="339" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="344" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="324" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="329" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="334" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="339" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="344" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="324" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="329" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="334" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="339" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="344" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="353" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="358" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="363" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="368" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="373" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="353" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="358" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="363" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="368" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="373" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="353" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="358" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="363" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="368" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="373" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="353" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="358" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="363" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="368" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="373" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="353" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="358" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="363" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="368" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="373" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="353" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="358" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="363" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="368" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="373" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="353" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="358" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="363" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="368" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="373" y="72" width="4" height="4" fill="#4ddb8a" />
+  <rect x="324" y="86" width="5" height="5" fill="#4ddb8a" />
+  <text x="337" y="91" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="17" font-weight="700" fill="#ececf1">Включить</text>
+  <text x="324" y="134" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#85858f">Настройки, Vencord, Plugins.</text>
+  <text x="324" y="153" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#85858f">Кнопка встанет рядом с микрофоном.</text>
+  <polygon points="596,26 599,26 599,23 602,23 602,20 862,20 862,23 865,23 865,26 868,26 868,182 865,182 865,185 862,185 862,188 602,188 602,185 599,185 599,182 596,182" fill="#2a2a31" />
+    <polygon points="597,27 600,27 600,24 603,24 603,21 861,21 861,24 864,24 864,27 867,27 867,181 864,181 864,184 861,184 861,187 603,187 603,184 600,184 600,181 597,181" fill="#0f0f12" />
+  <rect x="616" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="621" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="626" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="631" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="636" y="42" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="616" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="621" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="626" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="631" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="636" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="616" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="621" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="626" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="631" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="636" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="616" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="621" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="626" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="631" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="636" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="616" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="621" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="626" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="631" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="636" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="616" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="621" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="626" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="631" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="636" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="616" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="621" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="626" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="631" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="636" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="645" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="650" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="655" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="660" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="665" y="42" width="4" height="4" fill="#4ddb8a" />
+    <rect x="645" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="650" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="655" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="660" y="47" width="4" height="4" fill="#4ddb8a" />
+    <rect x="665" y="47" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="645" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="650" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="655" y="52" width="4" height="4" fill="#4ddb8a" />
+    <rect x="660" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="665" y="52" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="645" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="650" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="655" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="660" y="57" width="4" height="4" fill="#4ddb8a" />
+    <rect x="665" y="57" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="645" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="650" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="655" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="660" y="62" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="665" y="62" width="4" height="4" fill="#4ddb8a" />
+    <rect x="645" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="650" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="655" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="660" y="67" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="665" y="67" width="4" height="4" fill="#4ddb8a" />
+    <rect x="645" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+    <rect x="650" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="655" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="660" y="72" width="4" height="4" fill="#4ddb8a" />
+    <rect x="665" y="72" width="4" height="4" fill="rgba(255,255,255,.07)" />
+  <rect x="616" y="86" width="5" height="5" fill="#4ddb8a" />
+  <text x="629" y="91" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="17" font-weight="700" fill="#ececf1">Нажать</text>
+  <text x="616" y="134" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#85858f">Принимает квесты, выполняет,</text>
+  <text x="616" y="153" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="13" fill="#85858f">сам останавливается.</text>
+</svg>
