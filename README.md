@@ -208,6 +208,13 @@ npx eslint src/userplugins/QuestCompleter --ext .ts,.tsx
 | `native.ts` | два запроса к `discordsays` из главного процесса |
 | `hideHero.css` | скрытие обёртки баннера |
 | `setup.ps1` | установщик |
+| `assets/generate.mjs` | генератор картинок для этого README |
+
+Картинки не правятся руками. Поменял цвет или текст в генераторе и пересобрал:
+
+```powershell
+node assets\generate.mjs assets
+```
 
 После изменений в `native.ts` одного Ctrl+R мало: главный процесс читает его при старте, нужен полный перезапуск Discord.
 
