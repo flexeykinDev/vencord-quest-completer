@@ -84,6 +84,8 @@ export async function discordsaysProgress(_: unknown, { appId, questId, referrer
             "X-Discord-Quest-ID": questId,
             Referer: referrer
         },
-        JSON.stringify({ progress: Math.floor(progress) })
+        // quest_id дублируется в теле: заголовка X-Discord-Quest-ID серверу
+        // стало мало, он отвечает "quest_id missing in request body"
+        JSON.stringify({ quest_id: questId, progress: Math.floor(progress) })
     );
 }
