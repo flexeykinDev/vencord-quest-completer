@@ -74,6 +74,31 @@ export function getSupportedTask(quest: Quest): TaskName | undefined {
     return SUPPORTED_TASKS.find(task => tasks[task] != null);
 }
 
+/**
+ * Сколько орбов обещает квест. Форма rewardsConfig гуляет от версии к версии,
+ * поэтому ищем по смыслу ключа, а не по фиксированному пути. Не нашли - ноль,
+ * и тогда сумму просто не показываем, вместо того чтобы врать числом.
+ */
+export function getOrbReward(quest: Quest): number {
+    const claimed = quest.userStatus?.orbQuantityClaimed;
+    if (typeof claimed === "number" && claimed > 0) return claimed;
+
+    return findOrbAmount(quest.config?.rewardsConfig, 0);
+}
+
+function findOrbAmount(value: unknown, depth: number): number {
+    if (value == null || typeof value !== "object" || depth > 3) return 0;
+
+    for (const [key, entry] of Object.entries(value)) {
+        if (typeof entry === "number" && entry > 0 && /orb/i.test(key)) return entry;
+
+        const nested = findOrbAmount(entry, depth + 1);
+        if (nested > 0) return nested;
+    }
+
+    return 0;
+}
+
 export function getExpiresAt(quest: Quest): number | null {
     const raw = quest.config?.expiresAt ?? quest.expiresAt;
     if (raw == null) return null;

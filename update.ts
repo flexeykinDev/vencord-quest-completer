@@ -7,12 +7,13 @@
 import { showNotification } from "@api/Notifications";
 import { Logger } from "@utils/Logger";
 
+import { t } from "./i18n";
 import { settings } from "./settings";
 
 const logger = new Logger("QuestCompleter");
 
 /** Держать в курсе с тегом релиза на GitHub */
-export const VERSION = "1.1.2";
+export const VERSION = "1.2.0";
 
 const REPO = "flexeykinDev/vencord-quest-completer";
 const LATEST_RELEASE = `https://api.github.com/repos/${REPO}/releases/latest`;
@@ -78,8 +79,8 @@ export async function checkForUpdates() {
         logger.info(`Доступна версия ${tag}, установлена ${VERSION}`);
 
         showNotification({
-            title: "QuestCompleter: вышло обновление",
-            body: `Установлена ${VERSION}, доступна ${tag}. Нажми, чтобы открыть страницу релиза, или запусти установщик и выбери «Обновить».`,
+            title: "QuestCompleter",
+            body: t("u.available", { current: VERSION, latest: tag }),
             onClick: () => VencordNative.native.openExternal(RELEASES_PAGE)
         }).catch(err => logger.warn("Уведомление не показалось", err));
     } catch (err) {

@@ -7,6 +7,7 @@
 import { Logger } from "@utils/Logger";
 import { find } from "@webpack";
 
+import { t } from "./i18n";
 import { Quest } from "./types";
 
 const logger = new Logger("QuestCompleter");
@@ -53,7 +54,7 @@ function getStore<T>(name: string, filter: (module: any) => boolean): T {
         }
     }, { isIndirect: true });
 
-    if (found == null) throw new Error(`Не нашёл ${name} — вероятно, Discord обновился`);
+    if (found == null) throw new Error(t("e.storeMissing", { name }));
 
     logger.info(`Найден ${name}`);
     cache.set(name, found);

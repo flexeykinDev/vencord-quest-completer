@@ -5,8 +5,11 @@
  */
 
 import { findComponentByCodeLazy } from "@webpack";
+import { Menu, Popout, useRef } from "@webpack/common";
 
-import { startQuests, stopQuests, useRunState } from "./runner";
+import { t } from "./i18n";
+import { refreshQuests, startQuests, stopQuests, useRunState } from "./runner";
+import { settings } from "./settings";
 
 /** Та же кнопка панели аккаунта, что использует штатный GameActivityToggle */
 const PanelButton = findComponentByCodeLazy(".GREEN,positionKeyStemOverride:");
@@ -35,17 +38,71 @@ function QuestIcon() {
     );
 }
 
-export function QuestButton(props: { nameplate?: unknown; }) {
-    const { isRunning, statusText } = useRunState();
+/** «квест 2 из 7, осталось примерно 14 мин» */
+function buildTooltip(isRunning: boolean, statusText: string, etaAt: number | null) {
+    if (!isRunning) return t("b.start");
 
+    const parts = [statusText];
+
+    if (etaAt != null) {
+        const minutes = Math.max(1, Math.ceil((etaAt - Date.now()) / 60_000));
+        parts.push(t("b.estimate", { minutes }));
+    }
+
+    return t("b.stop", { status: parts.filter(Boolean).join(", ") });
+}
+
+export function QuestButton(props: { nameplate?: unknown; }) {
+    const { isRunning, statusText, etaAt } = useRunState();
+    const { autoAcceptQuests, achievementBypass } = settings.use(["autoAcceptQuests", "achievementBypass"]);
+
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+    const buttonProps = {
+        tooltipText: buildTooltip(isRunning, statusText, etaAt),
+        icon: QuestIcon,
+        role: "switch",
+        ariaChecked: isRunning,
+        plated: props?.nameplate != null,
+        onClick: isRunning ? stopQuests : startQuests
+    };
+
+    // Правый клик открывает то, за чем иначе пришлось бы идти в настройки
     return (
-        <PanelButton
-            tooltipText={isRunning ? `Остановить квесты (${statusText})` : "Выполнить квесты"}
-            icon={QuestIcon}
-            role="switch"
-            ariaChecked={isRunning}
-            plated={props?.nameplate != null}
-            onClick={isRunning ? stopQuests : startQuests}
-        />
+        <Popout
+            position="top"
+            align="left"
+            targetElementRef={buttonRef}
+            renderPopout={({ closePopout }) => (
+                <Menu.Menu navId="vc-questCompleter-menu" onClose={closePopout} aria-label="QuestCompleter">
+                    <Menu.MenuCheckboxItem
+                        id="vc-qc-auto-accept"
+                        label={t("m.autoAccept")}
+                        checked={autoAcceptQuests}
+                        action={() => settings.store.autoAcceptQuests = !settings.store.autoAcceptQuests}
+                    />
+                    <Menu.MenuCheckboxItem
+                        id="vc-qc-achievements"
+                        label={t("m.achievements")}
+                        checked={achievementBypass}
+                        action={() => settings.store.achievementBypass = !settings.store.achievementBypass}
+                    />
+                    <Menu.MenuSeparator />
+                    <Menu.MenuItem
+                        id="vc-qc-refresh"
+                        label={t("m.refresh")}
+                        action={() => void refreshQuests()}
+                    />
+                </Menu.Menu>
+            )}
+        >
+            {popoutProps => (
+                <PanelButton
+                    ref={buttonRef}
+                    onContextMenu={popoutProps.onClick}
+                    {...buttonProps}
+                />
+            )}
+        </Popout>
     );
 }

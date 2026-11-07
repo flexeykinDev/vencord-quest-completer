@@ -8,15 +8,20 @@ import { showNotification } from "@api/Notifications";
 import { Logger } from "@utils/Logger";
 import { useForceUpdater } from "@utils/react";
 import { PluginNative } from "@utils/types";
+import { findByCodeLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildChannelStore, RestAPI, useEffect } from "@webpack/common";
 
+import { t } from "./i18n";
 import { settings } from "./settings";
 import { getQuestsStore, getRunningGameStore, getStreamingStore, RunningGame } from "./stores";
-import { getExpiresAt, getSupportedTask, getTaskConfig, Quest, TaskName } from "./types";
+import { getExpiresAt, getOrbReward, getSupportedTask, getTaskConfig, Quest, TaskName } from "./types";
 
 const logger = new Logger("QuestCompleter");
 
 const Native = VencordNative.pluginHelpers.QuestCompleter as PluginNative<typeof import("./native")>;
+
+/** Тот же метод, которым Discord сам обновляет список раз в пару часов */
+const fetchCurrentQuests = findByCodeLazy("QUESTS_FETCH_CURRENT_QUESTS_BEGIN") as () => Promise<unknown>;
 
 const NOTIFICATION_COLORS = {
     message: undefined,
@@ -28,7 +33,7 @@ const NOTIFICATION_COLORS = {
  * Намеренно не showToast: тосты Discord ищутся мангленным поиском и уже дважды
  * ломались при его обновлениях, в последний раз роняя весь клиент через React.
  * Уведомления Vencord рисует своим компонентом, от внутренностей Discord они не
- * зависят. Логи дублируются в консоль, и ни один сбой показа не трогает квесты.
+ * зависят. Текст дублируется в консоль, и ни один сбой показа не трогает квесты.
  */
 function notify(message: string, type: "message" | "success" | "failure" = "message") {
     logger.info(message);
@@ -53,16 +58,27 @@ class Aborted extends Error { }
 interface RunState {
     isRunning: boolean;
     statusText: string;
+    /** Когда прогон предположительно закончится. Нужно только для подсказки на кнопке */
+    etaAt: number | null;
 }
 
-let state: RunState = { isRunning: false, statusText: "" };
+const IDLE: RunState = { isRunning: false, statusText: "", etaAt: null };
+
+let state: RunState = IDLE;
 let controller: AbortController | null = null;
+
+/**
+ * Квесты, упавшие в этом запуске клиента. Повторно за них не беремся: причина
+ * обычно не разовая, а для достижений каждая попытка ещё и выдаёт приложению
+ * доступ к аккаунту, пусть и отзываемый.
+ */
+const failedThisSession = new Set<string>();
 
 const listeners = new Set<() => void>();
 
-function setState(next: RunState) {
-    state = next;
-    listeners.forEach(notify => notify());
+function setState(next: Partial<RunState>) {
+    state = { ...state, ...next };
+    listeners.forEach(notifyListener => notifyListener());
 }
 
 /** Подписка на состояние запуска для перерисовки кнопки */
@@ -79,6 +95,17 @@ export function useRunState(): RunState {
 
 export function stopQuests() {
     controller?.abort();
+}
+
+/** Просит Discord прислать список заново, не дожидаясь его расписания */
+export async function refreshQuests() {
+    try {
+        await fetchCurrentQuests();
+        notify(t("m.refreshed"));
+    } catch (err) {
+        logger.error("Не смог обновить список квестов", err);
+        notify(t("m.refreshFailed"), "failure");
+    }
 }
 
 // ---------------------------------------------------------------- ожидания
@@ -122,7 +149,7 @@ function waitForHeartbeatProgress(quest: Quest, task: TaskName, secondsNeeded: n
             if (progress == null) return;
 
             const done = Math.floor(progress);
-            setState({ isRunning: true, statusText: `${done}/${secondsNeeded}` });
+            setState({ statusText: `${done}/${secondsNeeded}` });
             logger.info(`Прогресс: ${done}/${secondsNeeded}`);
 
             if (done >= secondsNeeded) {
@@ -178,7 +205,7 @@ async function runWatchVideo(quest: Quest, secondsNeeded: number, initialProgres
 
             completed = res.body.completed_at != null;
             secondsDone = next;
-            setState({ isRunning: true, statusText: `${secondsDone}/${secondsNeeded}` });
+            setState({ statusText: `${secondsDone}/${secondsNeeded}` });
             logger.info(`Видео: ${secondsDone}/${secondsNeeded}`);
         }
 
@@ -251,9 +278,7 @@ async function runPlayActivity(quest: Quest, secondsNeeded: number, signal: Abor
         ?? (Object.values(GuildChannelStore.getAllGuilds()) as any[])
             .find(guild => guild != null && guild.VOCAL.length > 0)?.VOCAL[0]?.channel?.id;
 
-    if (channelId == null) {
-        throw new Error("Для квеста-активности нужен хотя бы один личный чат или сервер с голосовым каналом");
-    }
+    if (channelId == null) throw new Error(t("e.noChannel"));
 
     const streamKey = `call:${channelId}:1`;
 
@@ -264,7 +289,7 @@ async function runPlayActivity(quest: Quest, secondsNeeded: number, signal: Abor
         });
 
         const progress: number = res.body.progress.PLAY_ACTIVITY.value;
-        setState({ isRunning: true, statusText: `${Math.floor(progress)}/${secondsNeeded}` });
+        setState({ statusText: `${Math.floor(progress)}/${secondsNeeded}` });
         logger.info(`Активность: ${Math.floor(progress)}/${secondsNeeded}`);
 
         if (progress >= secondsNeeded) {
@@ -347,8 +372,8 @@ async function acceptAvailableQuests(signal: AbortSignal) {
     const quests = getAcceptableQuests();
     if (quests.length === 0) return;
 
-    setState({ isRunning: true, statusText: "принимаю квесты" });
-    notify(`Принимаю квесты: ${quests.length}`);
+    setState({ statusText: t("r.statusAccept") });
+    notify(t("r.accepting", { count: quests.length }));
 
     for (const quest of quests) {
         await enrollQuest(quest, signal);
@@ -365,10 +390,10 @@ const ACHIEVEMENT_SCOPES = "identify applications.commands applications.entitlem
 
 /** Тело ответа бывает и объектом, и текстом. В сообщении об ошибке нужно и то и другое, но коротко */
 function describeBody(body: unknown) {
-    if (body == null) return "пустой ответ";
+    if (body == null) return "-";
 
     const text = typeof body === "string" ? body : JSON.stringify(body);
-    if (!text) return "пустой ответ";
+    if (!text) return "-";
 
     return text.length > 200 ? `${text.slice(0, 200)}…` : text;
 }
@@ -416,9 +441,7 @@ async function revokeNewGrants(before: Set<string>) {
  * Доступ отзывается в finally при любом исходе, включая остановку кнопкой.
  */
 async function runAchievementInActivity(quest: Quest, applicationId: string, target: number, signal: AbortSignal) {
-    if (!settings.store.achievementBypass) {
-        throw new Error("Квест на достижение пропущен: обход выключен в настройках");
-    }
+    if (!settings.store.achievementBypass) throw new Error(t("e.achievementsOff"));
 
     const grantsBefore = await listGrantIds();
 
@@ -441,17 +464,17 @@ async function runAchievementInActivity(quest: Quest, applicationId: string, tar
         const code = authRes.body?.location
             ? new URL(authRes.body.location).searchParams.get("code")
             : null;
-        if (!code) throw new Error("Discord не вернул код авторизации");
+        if (!code) throw new Error(t("e.noCode"));
 
         const ticketRes = await RestAPI.post({ url: `/applications/${applicationId}/proxy-tickets`, body: {} });
         const ticket = ticketRes.body?.ticket;
-        if (!ticket) throw new Error("Discord не выдал proxy-ticket");
+        if (!ticket) throw new Error(t("e.noTicket"));
 
         const referrer = `https://${applicationId}.discordsays.com/?instance_id=example-cl-instance&platform=desktop&discord_proxy_ticket=${ticket}`;
 
         const auth = await Native.discordsaysAuthorize({ appId: applicationId, questId: quest.id, referrer, code });
         if (!auth.ok || !auth.body?.token) {
-            throw new Error(`Активность не авторизовала нас (${auth.status}): ${describeBody(auth.body)}`);
+            throw new Error(t("e.authFailed", { status: auth.status, body: describeBody(auth.body) }));
         }
 
         let done = 0;
@@ -469,9 +492,9 @@ async function runAchievementInActivity(quest: Quest, applicationId: string, tar
                 progress: done
             });
 
-            if (!res.ok) throw new Error(`Прогресс не принят (${res.status}): ${describeBody(res.body)}`);
+            if (!res.ok) throw new Error(t("e.progressRejected", { status: res.status, body: describeBody(res.body) }));
 
-            setState({ isRunning: true, statusText: `${done}/${target}` });
+            setState({ statusText: `${done}/${target}` });
             logger.info(`Достижение: ${done}/${target}`);
 
             if (done < target) await sleep(18000, 4000, signal);
@@ -481,7 +504,45 @@ async function runAchievementInActivity(quest: Quest, applicationId: string, tar
     }
 }
 
+// ---------------------------------------------------------------- награда
+
+/**
+ * Награда забирается отдельным запросом, и Discord нередко просит на нём капчу.
+ * Решать капчу мы не будем, поэтому неудача здесь не считается провалом квеста:
+ * он уже выполнен, остаётся один клик рукой.
+ */
+async function claimReward(quest: Quest) {
+    const { questName } = quest.config.messages;
+
+    try {
+        await RestAPI.post({ url: `/quests/${quest.id}/claim-reward`, body: {} });
+        notify(t("r.claimed", { name: questName }), "success");
+    } catch (err: any) {
+        const status = err?.status ?? err?.res?.status ?? 0;
+        const body = err?.body ?? err?.res?.body ?? {};
+
+        logger.info(`Награду за "${questName}" автоматически забрать не вышло (${status}): ${describeBody(body)}`);
+        notify(t("r.claimManual", { name: questName }));
+    }
+}
+
 // ---------------------------------------------------------------- оркестрация
+
+/**
+ * Квест, за который сейчас нет смысла браться. Такие не должны попадать даже в
+ * счётчик: обещать одиннадцать и молча пропустить три это вранье в интерфейсе.
+ */
+function isRunnable(quest: Quest) {
+    if (failedThisSession.has(quest.id)) return false;
+
+    const task = getSupportedTask(quest);
+    if (task == null) return false;
+
+    if (task === "ACHIEVEMENT_IN_ACTIVITY" && !settings.store.achievementBypass) return false;
+    if ((task === "PLAY_ON_DESKTOP" || task === "STREAM_ON_DESKTOP") && !IS_DISCORD_DESKTOP) return false;
+
+    return true;
+}
 
 function getPendingQuests(): Quest[] {
     const now = Date.now();
@@ -492,8 +553,32 @@ function getPendingQuests(): Quest[] {
         return quest.userStatus?.enrolledAt != null
             && quest.userStatus?.completedAt == null
             && expiresAt != null && expiresAt > now
-            && getSupportedTask(quest) != null;
+            && isRunnable(quest);
     });
+}
+
+/** Грубая оценка оставшегося времени, нужна только для подсказки на кнопке */
+function estimateSeconds(quests: Quest[]) {
+    let total = 0;
+
+    for (const quest of quests) {
+        const task = getSupportedTask(quest);
+        if (task == null) continue;
+
+        const target = getTaskConfig(quest)?.tasks[task]?.target ?? 0;
+        const done = quest.userStatus?.progress?.[task]?.value ?? 0;
+        const left = Math.max(0, target - done);
+
+        if (task === "ACHIEVEMENT_IN_ACTIVITY") {
+            // тут цель в штуках, а время задают паузы между шагами
+            total += Math.ceil(left / achievementStep(target)) * 20;
+        } else {
+            total += left;
+        }
+    }
+
+    // пауза между квестами
+    return total + Math.max(0, quests.length - 1) * 30;
 }
 
 async function completeQuest(quest: Quest, signal: AbortSignal) {
@@ -514,12 +599,12 @@ async function completeQuest(quest: Quest, signal: AbortSignal) {
             break;
 
         case "PLAY_ON_DESKTOP":
-            if (!IS_DISCORD_DESKTOP) throw new Error("Этот квест работает только в десктопном приложении");
+            if (!IS_DISCORD_DESKTOP) throw new Error(t("e.desktopOnly"));
             await runPlayOnDesktop(quest, applicationId!, pid, secondsNeeded, signal);
             break;
 
         case "STREAM_ON_DESKTOP":
-            if (!IS_DISCORD_DESKTOP) throw new Error("Этот квест работает только в десктопном приложении");
+            if (!IS_DISCORD_DESKTOP) throw new Error(t("e.desktopOnly"));
             await runStreamOnDesktop(quest, applicationId!, pid, secondsNeeded, signal);
             break;
 
@@ -533,6 +618,8 @@ async function completeQuest(quest: Quest, signal: AbortSignal) {
     }
 
     logger.info(`Квест ${questName} выполнен`);
+
+    if (settings.store.claimRewards) await claimReward(quest);
 }
 
 export async function startQuests() {
@@ -540,6 +627,8 @@ export async function startQuests() {
 
     controller = new AbortController();
     const { signal } = controller;
+
+    setState({ isRunning: true, statusText: "", etaAt: null });
 
     try {
         if (settings.store.autoAcceptQuests) {
@@ -549,16 +638,21 @@ export async function startQuests() {
         const quests = getPendingQuests();
 
         if (quests.length === 0) {
-            notify("Нет незавершённых квестов");
+            notify(t("r.nothing"));
             return;
         }
 
-        notify(`Запускаю квесты: ${quests.length}`);
+        const orbs = quests.reduce((sum, quest) => sum + getOrbReward(quest), 0);
+        setState({ etaAt: Date.now() + estimateSeconds(quests) * 1000 });
+
+        notify(orbs > 0
+            ? t("r.startOrbs", { count: quests.length, orbs })
+            : t("r.start", { count: quests.length }));
 
         let failed = 0;
 
         for (let i = 0; i < quests.length; i++) {
-            setState({ isRunning: true, statusText: `квест ${i + 1} из ${quests.length}` });
+            setState({ statusText: t("r.statusQuest", { index: i + 1, total: quests.length }) });
 
             // Один упавший квест не повод бросать остальные: причина обычно в нём
             // самом, например он уже пройден или недоступен в этом регионе.
@@ -568,29 +662,34 @@ export async function startQuests() {
                 if (err instanceof Aborted) throw err;
 
                 failed++;
+                failedThisSession.add(quests[i].id);
+
                 const { questName } = quests[i].config.messages;
                 logger.error(`Квест "${questName}" не получился`, err);
-                notify(`Пропускаю "${questName}": ${err instanceof Error ? err.message : "ошибка"}`, "failure");
+                notify(t("r.skip", {
+                    name: questName,
+                    reason: err instanceof Error ? err.message : t("e.generic")
+                }), "failure");
             }
 
             if (i < quests.length - 1) {
                 logger.info("Пауза перед следующим квестом...");
-                setState({ isRunning: true, statusText: "пауза" });
+                setState({ statusText: t("r.statusPause") });
                 await sleep(30000, 30000, signal);
             }
         }
 
-        if (failed === 0) notify("Все квесты выполнены", "success");
-        else notify(`Готово. Не получилось: ${failed} из ${quests.length}`, "failure");
+        if (failed === 0) notify(t("r.allDone"), "success");
+        else notify(t("r.partial", { failed, total: quests.length }), "failure");
     } catch (err) {
         if (err instanceof Aborted) {
-            notify("Остановлено");
+            notify(t("r.stopped"));
         } else {
             logger.error(err);
-            notify(err instanceof Error ? err.message : "Ошибка, смотри консоль", "failure");
+            notify(err instanceof Error ? err.message : t("e.generic"), "failure");
         }
     } finally {
         controller = null;
-        setState({ isRunning: false, statusText: "" });
+        setState(IDLE);
     }
 }

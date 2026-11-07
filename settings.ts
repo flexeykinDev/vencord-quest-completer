@@ -9,69 +9,80 @@ import { disableStyle, enableStyle } from "@api/Styles";
 import { OptionType } from "@utils/types";
 
 import hideHeroStyle from "./hideHero.css?managed";
+import { t } from "./i18n";
 
 export { hideHeroStyle };
 
+/*
+ * Описания намеренно сделаны геттерами. Настройки создаются при загрузке
+ * плагина, а стор локали к этому моменту ещё не готов: обычная строка
+ * навсегда застыла бы на английском. Геттер читается в момент показа.
+ */
 export const settings = definePluginSettings({
     checkForUpdates: {
         type: OptionType.BOOLEAN,
-        description: "Проверять обновления плагина на GitHub, не чаще раза в шесть часов",
+        get description() { return t("s.checkUpdates"); },
         default: true
     },
     lastUpdateCheck: {
         type: OptionType.NUMBER,
-        description: "Время последней проверки обновлений",
+        description: "",
         default: 0,
         hidden: true
     },
     autoAcceptQuests: {
         type: OptionType.BOOLEAN,
-        description: "Сначала принимать все доступные квесты, потом выполнять",
+        get description() { return t("s.autoAccept"); },
         default: false
     },
     achievementBypass: {
         type: OptionType.BOOLEAN,
-        description: "Квесты на достижения. ВНИМАНИЕ: выдаёт приложению игры доступ к аккаунту через OAuth. Доступ отзывается сразу после квеста, но риск выше, чем у обычной подделки прогресса",
+        get description() { return t("s.achievements"); },
+        default: false
+    },
+    claimRewards: {
+        type: OptionType.BOOLEAN,
+        get description() { return t("s.claim"); },
         default: false
     },
     filterQuestList: {
         type: OptionType.BOOLEAN,
-        description: "Фильтровать список квестов на странице Quests",
+        get description() { return t("s.filter"); },
         default: true
     },
     showAvailable: {
         type: OptionType.BOOLEAN,
-        description: "Показывать квесты, которые можно принять",
+        get description() { return t("s.showAvailable"); },
         default: true
     },
     showInProgress: {
         type: OptionType.BOOLEAN,
-        description: "Показывать квесты в процессе",
+        get description() { return t("s.showInProgress"); },
         default: true
     },
     showClaimable: {
         type: OptionType.BOOLEAN,
-        description: "Показывать выполненные, у которых не забрана награда",
+        get description() { return t("s.showClaimable"); },
         default: true
     },
     showClaimed: {
         type: OptionType.BOOLEAN,
-        description: "Показывать завершённые (награда уже получена)",
+        get description() { return t("s.showClaimed"); },
         default: false
     },
     showExpired: {
         type: OptionType.BOOLEAN,
-        description: "Показывать истёкшие",
+        get description() { return t("s.showExpired"); },
         default: false
     },
     onlyOrbs: {
         type: OptionType.BOOLEAN,
-        description: "Только квесты с наградой в орбах",
+        get description() { return t("s.onlyOrbs"); },
         default: false
     },
     hideSponsoredBanner: {
         type: OptionType.BOOLEAN,
-        description: "Скрывать баннер сверху страницы Quests и ряд карточек под ним",
+        get description() { return t("s.hideBanner"); },
         default: true,
         onChange(value: boolean) {
             if (value) enableStyle(hideHeroStyle);
