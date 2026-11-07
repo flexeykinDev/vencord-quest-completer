@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Генератор пиксельной графики для README QuestCompleter.
-// Запуск: node gen-art.mjs <куда-класть-assets>
+// Генератор картинок для README. На каждый язык своя пара файлов.
+// Запуск: node generate.mjs <куда-класть>
 
-import { mkdirSync,writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const OUT = process.argv[2];
@@ -31,6 +31,36 @@ const C = {
     dotOff: "rgba(255,255,255,.07)"
 };
 
+const LANGS = {
+    en: {
+        subtitle: "Discord quests in one button. No ads, no clutter.",
+        pills: ["running", "filter", "no banner"],
+        steps: [
+            { n: "01", title: "Install", body: "One line in PowerShell.\nNo Node or Git needed up front." },
+            { n: "02", title: "Enable", body: "Settings, Vencord, Plugins.\nThe button lands next to the mic." },
+            { n: "03", title: "Click", body: "Accepts quests, runs them,\nstops on its own." }
+        ]
+    },
+    ru: {
+        subtitle: "Квесты Discord в одну кнопку. Без рекламы и лишних карточек.",
+        pills: ["выполнение", "фильтр", "без баннера"],
+        steps: [
+            { n: "01", title: "Поставить", body: "Одна строка в PowerShell.\nНи Node, ни Git заранее не нужны." },
+            { n: "02", title: "Включить", body: "Настройки, Vencord, Plugins.\nКнопка встанет рядом с микрофоном." },
+            { n: "03", title: "Нажать", body: "Принимает квесты, выполняет,\nсам останавливается." }
+        ]
+    },
+    uk: {
+        subtitle: "Квести Discord в одну кнопку. Без реклами та зайвих карток.",
+        pills: ["виконання", "фільтр", "без банера"],
+        steps: [
+            { n: "01", title: "Встановити", body: "Один рядок у PowerShell.\nНі Node, ні Git заздалегідь не потрібні." },
+            { n: "02", title: "Увімкнути", body: "Налаштування, Vencord, Plugins.\nКнопка стане поруч із мікрофоном." },
+            { n: "03", title: "Натиснути", body: "Приймає квести, виконує,\nсам зупиняється." }
+        ]
+    }
+};
+
 const FONT = {
     "0": ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
     "1": ["00100", "01100", "00100", "00100", "00100", "00100", "01110"],
@@ -43,9 +73,10 @@ const FONT = {
     "8": ["01110", "10001", "10001", "01110", "10001", "10001", "01110"],
     "9": ["01110", "10001", "10001", "01111", "00001", "00010", "01100"],
     ".": ["00000", "00000", "00000", "00000", "00000", "01100", "01100"],
-    "/": ["00001", "00010", "00010", "00100", "01000", "01000", "10000"],
     "-": ["00000", "00000", "00000", "11111", "00000", "00000", "00000"]
 };
+
+const FONT_STACK = "Inter, 'Segoe UI', system-ui, sans-serif";
 
 /** Ступенчатый «пиксельный» контур: углы срезаны лесенкой в два шага */
 function notch(x, y, w, h, s = 3) {
@@ -84,12 +115,9 @@ function dots(text, x, y, { d = 3, g = 1, on = C.text, off = C.dotOff } = {}) {
     return { svg: out.join("\n    "), width: cx - x - step };
 }
 
-/** Квадратный маркер секции */
 function marker(x, y, size = 6, fill = C.accent) {
     return `<rect x="${x}" y="${y}" width="${size}" height="${size}" fill="${fill}" />`;
 }
-
-const FONT_STACK = "Inter, 'Segoe UI', system-ui, sans-serif";
 
 /** Зерно и редкие пылинки, чтобы фон не был стерильным */
 function grain(w, h, seed = 1) {
@@ -118,13 +146,26 @@ const defs = `<defs>
     </linearGradient>
   </defs>`;
 
-// ---------------------------------------------------------------- баннер
+/** Ширина пилюли на глаз: шрифт 12px, кириллица и латиница тут близки */
+function pillWidth(label) {
+    return Math.round(label.length * 7.2) + 28;
+}
 
-function banner() {
+function banner(lang, version) {
     const W = 880, H = 200;
-    const version = dots("1.1.1", 700, 150, { d: 3, g: 1, on: C.accent });
+    const { subtitle, pills } = LANGS[lang];
+    const versionDots = dots(version, 700, 150, { d: 3, g: 1, on: C.accent });
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="QuestCompleter, плагин Vencord">
+    let pillX = 120;
+    const pillSvg = pills.map(label => {
+        const w = pillWidth(label);
+        const svg = `${panel(pillX, 156, w, 26, { fill: C.panel2, stroke: C.lineHi, s: 2 })}
+  <text x="${pillX + w / 2}" y="173" text-anchor="middle" font-family="${FONT_STACK}" font-size="12" fill="${C.dim}">${label}</text>`;
+        pillX += w + 10;
+        return svg;
+    }).join("\n  ");
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="QuestCompleter">
   ${defs}
   <rect width="${W}" height="${H}" fill="${C.bg}" />
   ${grain(W, H, 7)}
@@ -142,33 +183,21 @@ function banner() {
   <text x="134" y="66" font-family="${FONT_STACK}" font-size="13" font-weight="700" fill="${C.accent}" letter-spacing="3.4">VENCORD USERPLUGIN</text>
 
   <text x="118" y="110" font-family="${FONT_STACK}" font-size="42" font-weight="700" fill="${C.text}" letter-spacing="-0.6">QuestCompleter</text>
-  <text x="120" y="138" font-family="${FONT_STACK}" font-size="16" fill="${C.muted}">Квесты Discord в одну кнопку. Без рекламы и лишних карточек.</text>
+  <text x="120" y="138" font-family="${FONT_STACK}" font-size="16" fill="${C.muted}">${subtitle}</text>
 
-  ${["выполнение", "фильтр", "без баннера"].map((label, i) => {
-        const w = [112, 84, 124][i];
-        const x = 120 + [0, 122, 216][i];
-        return `${panel(x, 156, w, 26, { fill: C.panel2, stroke: C.lineHi, s: 2 })}
-  <text x="${x + w / 2}" y="173" text-anchor="middle" font-family="${FONT_STACK}" font-size="12" fill="${C.dim}">${label}</text>`;
-    }).join("\n  ")}
+  ${pillSvg}
 
-  <text x="${700 + version.width}" y="140" text-anchor="end" font-family="${FONT_STACK}" font-size="10" fill="${C.dim}" letter-spacing="3">VERSION</text>
-  ${version.svg}
+  <text x="${700 + versionDots.width}" y="140" text-anchor="end" font-family="${FONT_STACK}" font-size="10" fill="${C.dim}" letter-spacing="3">VERSION</text>
+  ${versionDots.svg}
 </svg>
 `;
 }
 
-// ---------------------------------------------------------------- три шага
-
-function steps() {
+function steps(lang) {
     const W = 880, H = 208;
     const cardW = 272, cardH = 168, gap = 20;
-    const items = [
-        { n: "01", title: "Поставить", body: "Одна строка в PowerShell.\nНи Node, ни Git заранее не нужны." },
-        { n: "02", title: "Включить", body: "Настройки, Vencord, Plugins.\nКнопка встанет рядом с микрофоном." },
-        { n: "03", title: "Нажать", body: "Принимает квесты, выполняет,\nсам останавливается." }
-    ];
 
-    const cards = items.map((item, i) => {
+    const cards = LANGS[lang].steps.map((item, i) => {
         const x = 12 + i * (cardW + gap);
         const num = dots(item.n, x + 20, 42, { d: 4, g: 1, on: C.accent });
         const lines = item.body.split("\n").map((line, li) =>
@@ -178,11 +207,11 @@ function steps() {
         return `${panel(x, 20, cardW, cardH, { fill: C.panel })}
   ${num.svg}
   ${marker(x + 20, 86, 5)}
-  <text x="${x + 33}" y="${91}" font-family="${FONT_STACK}" font-size="17" font-weight="700" fill="${C.text}">${item.title}</text>
+  <text x="${x + 33}" y="91" font-family="${FONT_STACK}" font-size="17" font-weight="700" fill="${C.text}">${item.title}</text>
   ${lines}`;
     }).join("\n  ");
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Три шага установки">
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="QuestCompleter setup steps">
   ${defs}
   <rect width="${W}" height="${H}" fill="${C.bg}" />
   ${grain(W, H, 23)}
@@ -191,6 +220,11 @@ function steps() {
 `;
 }
 
-writeFileSync(join(OUT, "banner.svg"), banner());
-writeFileSync(join(OUT, "steps.svg"), steps());
-console.log("готово: banner.svg, steps.svg");
+const VERSION = "1.2.0";
+
+for (const lang of Object.keys(LANGS)) {
+    writeFileSync(join(OUT, `banner.${lang}.svg`), banner(lang, VERSION));
+    writeFileSync(join(OUT, `steps.${lang}.svg`), steps(lang));
+}
+
+console.log(`готово: ${Object.keys(LANGS).length * 2} файла`);

@@ -1,80 +1,82 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="QuestCompleter" width="880">
+<img src="assets/banner.en.svg" alt="QuestCompleter" width="880">
 
-<p>Плагин для <a href="https://github.com/Vendicated/Vencord">Vencord</a>: выполняет квесты Discord по кнопке, чистит список квестов и убирает рекламный баннер.</p>
+<p>A <a href="https://github.com/Vendicated/Vencord">Vencord</a> plugin: runs Discord quests from one button, cleans up the quest list and removes the ad banner.</p>
 
 <p>
 <img src="https://img.shields.io/badge/Vencord-userplugin-5865F2" alt="Vencord userplugin">
-<img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4" alt="Windows 10 и 11">
-<img src="https://img.shields.io/badge/установщик-PowerShell-5391FE" alt="Установщик на PowerShell">
-<img src="https://img.shields.io/badge/лицензия-GPL--3.0-blue" alt="Лицензия GPL-3.0">
-<a href="https://www.virustotal.com/gui/file/f82452a0e8bd8a13e4b93879657f268f9d2793bb072b215f36ad096a9b1e4913/detection"><img src="https://img.shields.io/badge/VirusTotal-0%20%2F%2062-2ea043" alt="VirusTotal: 0 детектов из 62"></a>
+<img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4" alt="Windows 10 and 11">
+<img src="https://img.shields.io/badge/installer-PowerShell-5391FE" alt="PowerShell installer">
+<img src="https://img.shields.io/badge/license-GPL--3.0-blue" alt="GPL-3.0 license">
+<a href="https://www.virustotal.com/gui/file/f82452a0e8bd8a13e4b93879657f268f9d2793bb072b215f36ad096a9b1e4913/detection"><img src="https://img.shields.io/badge/VirusTotal-0%20%2F%2062-2ea043" alt="VirusTotal: 0 of 62"></a>
 </p>
+
+<p>English · <a href="README.ru.md">Русский</a> · <a href="README.uk.md">Українська</a></p>
 
 </div>
 
-## Установка
+## Install
 
-<img src="assets/steps.svg" alt="Три шага: поставить, включить, нажать" width="880">
+<img src="assets/steps.en.svg" alt="Three steps: install, enable, click" width="880">
 
-Открой PowerShell и вставь одну строку. Установщик покажет меню: поставить, обновить, удалить.
+Open PowerShell and paste one line. The installer shows a menu: install, update, remove.
 
 ```powershell
 $s="$env:TEMP\qc-setup.ps1"; irm https://raw.githubusercontent.com/flexeykinDev/vencord-quest-completer/main/setup.ps1 -OutFile $s; powershell -NoProfile -ExecutionPolicy Bypass -File $s
 ```
 
-Ставить что-либо заранее не нужно, даже Git. Чего не хватает для сборки, скрипт предложит доставить через `winget`, встроенный в Windows 11. Про каждый инструмент спрашивает отдельно, молча ничего не ставит. Папку Vencord тоже ищет сам.
+You need nothing installed up front, not even Git. Whatever is missing for the build, the script offers to fetch through `winget`, which ships with Windows 11. It asks about each tool separately and never installs anything silently. It finds your Vencord folder on its own too.
 
-### Без командной строки
+### Without the command line
 
-В [релизах](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest) лежит архив. Скачай, распакуй и запусти двойным кликом:
+Grab the archive from [releases](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest), unpack it and double click:
 
-| Файл | Что делает |
+| File | What it does |
 | --- | --- |
-| `install.cmd` | сразу ставит |
-| `uninstall.cmd` | сразу удаляет |
-| `setup.cmd` | показывает меню |
+| `install.cmd` | installs right away |
+| `uninstall.cmd` | removes right away |
+| `setup.cmd` | shows the menu |
 
-## Удаление
+## Remove
 
-Тем же установщиком, пункт 3 в меню. Или сразу:
+Same installer, option 3 in the menu. Or straight away:
 
 ```powershell
 $s="$env:TEMP\qc-setup.ps1"; irm https://raw.githubusercontent.com/flexeykinDev/vencord-quest-completer/main/setup.ps1 -OutFile $s; powershell -NoProfile -ExecutionPolicy Bypass -File $s -Action Uninstall
 ```
 
-Спросит, до какой степени резать:
+It asks how deep to cut:
 
-| Вариант | Что убирает |
+| Option | What goes |
 | --- | --- |
-| 1 | только плагин, Vencord и остальные плагины остаются |
-| 2 | плагин и Vencord из Discord, клиент возвращается в исходный вид |
-| 3 | всё, включая папку с исходниками и инструменты сборки |
+| 1 | the plugin only, Vencord and your other plugins stay |
+| 2 | the plugin, plus Vencord is unhooked and Discord goes back to stock |
+| 3 | everything, including the Vencord source folder and the build tools |
 
-Каждый разрушительный шаг подтверждается отдельно.
+Every destructive step is confirmed separately.
 
-## Про запуск скриптов
+## About running scripts
 
-По умолчанию Windows не даёт запускать скачанные скрипты. Поэтому и в команде выше, и в `setup.cmd` стоит `-ExecutionPolicy Bypass`: он действует только на один запущенный процесс. Менять политику машины через `Set-ExecutionPolicy` не нужно.
+Windows blocks downloaded scripts by default. That is why both the command above and `setup.cmd` pass `-ExecutionPolicy Bypass`: it applies to that one process only. You do not need to change your machine's policy with `Set-ExecutionPolicy`.
 
-Когда скрипт закончит, останется три шага в самом Discord:
+Once the script is done, three steps are left in Discord itself:
 
 1. Ctrl+R
-2. Настройки, Vencord, Plugins, включить `QuestCompleter`
-3. Ещё раз Ctrl+R
+2. Settings, Vencord, Plugins, enable `QuestCompleter`
+3. Ctrl+R again
 
-Кнопка появится в панели аккаунта слева внизу, рядом с микрофоном.
+The button shows up in the account panel at the bottom left, next to the mic.
 
 <details>
-<summary>Установка вручную</summary>
+<summary>Manual install</summary>
 
 ```powershell
 winget install OpenJS.NodeJS.LTS
 winget install Git.Git
 ```
 
-Закрой и открой PowerShell заново, иначе `node` и `git` ещё не будут видны.
+Close and reopen PowerShell, otherwise `node` and `git` are not visible yet.
 
 ```powershell
 npm i -g pnpm
@@ -86,167 +88,167 @@ pnpm build
 pnpm inject
 ```
 
-Папки `src/userplugins` после клонирования нет, потому что она в `.gitignore` самого Vencord. Её создаёт эта команда.
+There is no `src/userplugins` folder after cloning, because it sits in Vencord's own `.gitignore`. The command above creates it.
 
-То же самое напечатает `setup.ps1 -Action Manual`.
+`setup.ps1 -Action Manual` prints the same thing.
 
 </details>
 
-## Что умеет
+## What it does
 
-**Выполняет квесты.** Кнопка рядом с микрофоном. Иконка показывает состояние, в подсказке виден прогресс, повторное нажатие останавливает.
+**Runs quests.** A button next to the mic. The icon shows the state, the tooltip shows progress, clicking again stops it.
 
-| Тип задания | Как выполняется |
+| Task type | How it is done |
 | --- | --- |
-| Посмотреть видео | шлёт прогресс просмотра, отсчитывая реальное время |
-| Поиграть на десктопе | временно подменяет список запущенных игр |
-| Пострелять стрим | временно подменяет метаданные стрима |
-| Сыграть активность | шлёт heartbeat в голосовой канал |
-| Достижение в активности | проходит авторизацию активности, см. ниже |
+| Watch a video | sends watch progress, counting real time |
+| Play on desktop | temporarily swaps the list of running games |
+| Stream on desktop | temporarily swaps the stream metadata |
+| Play an activity | sends a heartbeat into a voice channel |
+| Achievement in an activity | goes through the activity's authorization, see below |
 
-Платформа выбирается сама. У многих квестов в конфиге лежит сразу несколько заданий, например `PLAY_ON_DESKTOP`, `PLAY_ON_XBOX` и `PLAY_ON_PLAYSTATION`, и выпадашка «Select a platform» в интерфейсе выбирает, какое выполнять. Плагин всегда берёт десктопное: консольных заданий в его списке нет, подделать игру на приставке он всё равно не может. Квест, где нет ни одного поддерживаемого задания, просто пропускается.
+The platform is picked automatically. Many quests carry several tasks at once, for example `PLAY_ON_DESKTOP`, `PLAY_ON_XBOX` and `PLAY_ON_PLAYSTATION`, and the "Select a platform" dropdown decides which one you do. The plugin always takes the desktop one: console tasks are not in its list, and it could not fake a console session anyway. A quest with no supported task is skipped.
 
-Между запросами стоят рандомизированные задержки, между квестами пауза от 15 до 45 секунд. Все подменённые методы возвращаются на место в `finally`: и при успехе, и при ошибке, и при остановке, и при выключении плагина.
+Requests are spaced with randomized delays, and quests are separated by a pause of 15 to 45 seconds. Every swapped method is put back in a `finally`: on success, on error, when you press stop, and when the plugin is disabled.
 
-Прогресс просмотра видео отсчитывается от момента принятия квеста и не может обогнать реальное время больше чем на десять секунд. Квест, принятый час назад, не досчитается мгновенно.
+Video progress is counted from the moment the quest was accepted and cannot run more than ten seconds ahead of real time. A quest accepted an hour ago will not finish instantly.
 
-**Принимает квесты.** По умолчанию плагин видит только принятые квесты и непринятые молча пропускает. Настройка «Сначала принимать все доступные квесты» снимает этот шаг с тебя: кнопка сперва примет всё доступное, потом пойдёт выполнять. На ответ 429 плагин ждёт ровно столько, сколько просит Discord.
+**Accepts quests.** By default the plugin only sees quests you have already accepted and quietly skips the rest. The "Accept every available quest first" setting takes that chore off you: the button accepts everything available, then starts running. On a 429 it waits exactly as long as Discord asks.
 
-**Чистит список.** На странице Quests остаются только нужные состояния, остальное скрыто.
+**Cleans the list.** Only the states you care about stay on the Quests page.
 
-**Убирает баннер.** Рекламный блок сверху и ряд карточек под ним.
+**Removes the banner.** The ad block at the top and the row of cards under it.
 
-## Кнопка
+## The button
 
-Наведи, и в подсказке будет видно, что происходит прямо сейчас: какой квест по счёту идёт и сколько примерно осталось, например «квест 2 из 7, осталось примерно 14 мин».
+Hover it and the tooltip tells you what is happening right now: which quest is running and roughly how much is left, for example "quest 2 of 7, about 14 min left".
 
-Правый клик открывает меню, чтобы не ходить в настройки из-за одной галочки:
+Right click opens a menu so you do not have to walk into settings for one checkbox:
 
-| Пункт | Зачем |
+| Item | Why |
 | --- | --- |
-| Сначала принимать квесты | та же настройка, переключается на месте |
-| Квесты на достижения | то же самое |
-| Обновить список квестов | просит Discord прислать список заново |
+| Accept quests first | the same setting, toggled in place |
+| Achievement quests | same |
+| Refresh quest list | asks Discord to send the list again |
 
-Последний пункт полезен сам по себе: обычно Discord обновляет список раз в пару часов, и дождаться новых квестов иначе можно только перезапуском клиента.
+That last one is useful on its own: Discord normally refreshes the list every couple of hours, and otherwise the only way to see new quests is restarting the client.
 
-Счётчик в уведомлении честный. Квесты, за которые сейчас нет смысла браться, в него не попадают: достижения при выключенном обходе, десктопные задания в браузерной версии и те, что уже упали в этом запуске. Обещать одиннадцать и молча пропустить три было бы враньём в интерфейсе.
+The counter is honest. Quests there is no point starting do not go into it: achievement quests while the bypass is off, desktop tasks in the browser build, and anything that already failed this session. Promising eleven and silently doing eight would be lying in the UI.
 
-Если плагин знает размер награды, он покажет и её: «Запускаю квесты: 7, орбов: 3400».
+If the plugin can read the reward size, it shows that too: "Running 7 quests, 3400 Orbs".
 
-## Язык
+## Language
 
-Плагин говорит на языке клиента: русский, украинский, английский. Язык берётся из настроек самого Discord, отдельно выбирать ничего не нужно. Для остальных языков показывается английский.
+The plugin speaks your client's language: English, Russian, Ukrainian. It reads the language from Discord's own settings, so there is nothing to pick. Anything else falls back to English.
 
-Переводятся настройки, уведомления, подсказка на кнопке и тексты ошибок. Сообщения в консоли DevTools остаются на русском: это диагностика, а не интерфейс.
+Settings, notifications, the button tooltip and error messages are translated. Console output in DevTools stays in Russian: that is diagnostics, not interface.
 
-## Квесты на достижения
+## Achievement quests
 
-Отдельная история, поэтому и отдельная настройка, выключенная по умолчанию.
+A separate story, and therefore a separate setting, off by default.
 
-Такие квесты не берут подделку heartbeat: Discord ждёт, что прогресс подтвердит сама активность. Обойти это можно только одним способом — пройти настоящую авторизацию OAuth, то есть **реально выдать приложению игры доступ к твоему аккаунту** со scope `identify applications.commands applications.entitlements`.
+These quests do not fall for heartbeat spoofing: Discord expects the activity itself to confirm progress. There is exactly one way around that, going through a real OAuth authorization, which **actually grants the game's app access to your account** with the scope `identify applications.commands applications.entitlements`.
 
-Это принципиально отличается от остальных заданий. Там подделывается счётчик, здесь выдаётся доступ.
+That is fundamentally different from the other tasks. There, a counter is faked. Here, access is granted.
 
-Что сделано, чтобы снизить риск:
+What is done to keep the risk down:
 
-- настройка выключена по умолчанию, предупреждение написано прямо в её описании
-- выданный доступ отзывается в `finally`, то есть и при ошибке, и когда ты нажал «стоп»
-- прогресс идёт в реальном темпе, по 30–50 единиц каждые ~18 секунд, а не разом
-- запросы к `discordsays` живут в `native.ts` и ограничены двумя функциями: ни токена аккаунта, ни капчи, ни работы с файлами, а хост и referrer проверяются перед каждым вызовом
+- the setting is off by default and the warning is written into its description
+- the granted access is revoked in a `finally`, so both on error and when you press stop
+- progress moves at a realistic pace instead of jumping to the target
+- the `discordsays` requests live in `native.ts` and are limited to two functions: no account token, no captcha, no file access, and the host and referrer are checked before every call
 
-После первого запуска загляни в Настройки Discord, Авторизованные приложения, и убедись, что там пусто.
+After the first run, open Discord Settings, Authorized Apps, and check that it is empty.
 
-## Настройки
+## Settings
 
-| Настройка | По умолчанию | Что делает |
+| Setting | Default | What it does |
 | --- | --- | --- |
-| Проверять обновления на GitHub | вкл | раз в шесть часов, одно уведомление |
-| Сначала принимать все доступные квесты | выкл | принимает непринятые, потом выполняет |
-| Квесты на достижения | выкл | обход через OAuth, см. раздел выше |
-| Забирать награду после выполнения | выкл | пробует забрать, при капче просит сделать это вручную |
-| Фильтровать список квестов | вкл | общий рубильник, выключает весь фильтр |
-| Можно принять | вкл | ещё не принятые |
-| В процессе | вкл | принятые, прогресс идёт |
-| Забрать награду | вкл | выполненные, награда не забрана |
-| Завершённые | выкл | награда уже получена |
-| Истёкшие | выкл | срок вышел |
-| Только награда в орбах | выкл | прячет всё, где награда не в орбах |
-| Скрывать баннер сверху | вкл | баннер и ряд карточек под ним |
+| Check GitHub for updates | on | once every six hours, one notification |
+| Accept every available quest first | off | accepts the unaccepted ones, then runs them |
+| Achievement quests | off | OAuth bypass, see the section above |
+| Claim the reward after a quest | off | tries to claim, asks you to do it by hand on a captcha |
+| Filter the quest list | on | master switch for the whole filter |
+| Can be accepted | on | not accepted yet |
+| In progress | on | accepted, progress is moving |
+| Claim reward | on | finished, reward not taken |
+| Finished | off | reward already claimed |
+| Expired | off | out of time |
+| Only Orb rewards | off | hides everything that does not pay in Orbs |
+| Hide the top banner | on | the banner and the card row under it |
 
-По умолчанию в списке остаются ровно три состояния: принять, в процессе, забрать награду. Вкладка «Claimed Quests» работает как обычно, фильтр её не трогает.
+By default exactly three states stay in the list: can accept, in progress, claim reward. The "Claimed Quests" tab works as usual, the filter does not touch it.
 
-## Как это сделано
+## How it works
 
-Плагин не прячет готовую разметку, а подключается к тем местам, где Discord сам принимает решения.
+The plugin does not hide finished markup. It hooks the places where Discord makes the decision itself.
 
-| Что | Куда подключается |
+| What | Where it hooks |
 | --- | --- |
-| Фильтр списка | хук, собирающий массив квестов для страницы. Один источник и для секций, и для плоского списка |
-| Реклама | метод стора рекламы. Возвращаем `null`, а это там штатное значение, означает «рекламы не подобралось» |
-| Баннер | сам компонент баннера. Когда рекламы нет, Discord рисует на её месте свой промо-блок про орбы |
-| Обёртка баннера | единственное место со стилем. Обёртку рисует отдельный компонент со скелетоном загрузки, и без этого на странице остаётся пустой прямоугольник |
-| Кнопка | панель аккаунта, то же место, что у штатного GameActivityToggle |
-| Достижения | `native.ts` в главном процессе: запросы к `discordsays` режет CSP рендерера |
+| List filter | the hook that builds the quest array for the page. One source for both the sections and the flat list |
+| Ads | the ad store's method. We return `null`, which is a normal value there meaning "no ad was matched" |
+| Banner | the banner component itself. With no ad, Discord draws its own Orbs promo in that spot |
+| Banner wrapper | the only place with CSS. The wrapper is drawn by a separate component with a loading skeleton, and without this the page keeps an empty rectangle |
+| Button | the account panel, the same spot the stock GameActivityToggle uses |
+| Achievements | `native.ts` in the main process: the renderer's CSP blocks requests to `discordsays` |
 
-Стора квестов нет в реестре Flux под ожидаемым именем, поэтому он ищется по набору методов, а не по имени.
+The quests store is not in the Flux registry under the expected name, so it is found by its set of methods instead.
 
-## Если сломалось
+## When it breaks
 
-Плагин завязан на внутренности Discord, а они меняются с обновлениями.
+The plugin leans on Discord's internals, and those change with updates.
 
-| Симптом | Что делать |
+| Symptom | What to do |
 | --- | --- |
-| Кнопка пропала из панели | не прошёл патч, ищи в консоли сообщение Vencord про неудавшийся патч |
-| Всплывашка «Не нашёл QuestsStore» | изменились сигнатуры сторов, правится в `stores.ts` |
-| Баннер вернулся | Discord переехал, нужен новый якорь для патча |
-| Vencord пропал после обновления Discord | слетело подключение, плагин ни при чём: `pnpm inject` |
-| «Квест на достижение пропущен» | обход выключен, включи его в настройках и прочитай раздел выше |
-| Квесты на достижения молчат | после появления `native.ts` нужен полный перезапуск Discord, а не Ctrl+R |
+| The button is gone from the panel | a patch did not apply, look for Vencord's failed patch message in the console |
+| A "could not find QuestsStore" notification | store signatures changed, fix in `stores.ts` |
+| The banner is back | Discord moved, the patch needs a new anchor |
+| Vencord disappeared after a Discord update | the hook came off, nothing to do with the plugin: `pnpm inject` |
+| "Achievement quest skipped" | the bypass is off, turn it on and read the section above |
+| Achievement quests do nothing | `native.ts` needs a full Discord restart, Ctrl+R is not enough |
 
-Логи пишутся в консоль DevTools с префиксом `[Vencord] [QuestCompleter]`:
+Logs go to the DevTools console with the `[Vencord] [QuestCompleter]` prefix:
 
 ```
 [Vencord] [QuestCompleter] Найден QuestsStore
-[Vencord] [QuestCompleter] Начинаю квест: Название (PLAY_ON_DESKTOP)
+[Vencord] [QuestCompleter] Начинаю квест: Name (PLAY_ON_DESKTOP)
 [Vencord] [QuestCompleter] Прогресс: 119/900
 ```
 
 <details>
-<summary>Для разработки</summary>
+<summary>Development</summary>
 
 ```powershell
-pnpm watch        # пересборка при каждом сохранении
-pnpm testTsc      # проверка типов, esbuild их не проверяет
-npx eslint src/userplugins/QuestCompleter --ext .ts,.tsx
+pnpm watch        # rebuild on every save
+pnpm test:ts      # typecheck, esbuild does not do it
+npx eslint src/userplugins/QuestCompleter --ext .ts,.tsx,.mjs
 ```
 
-После каждой пересборки Ctrl+R в Discord.
+Ctrl+R in Discord after every rebuild.
 
-| Файл | Что внутри |
+| File | What is inside |
 | --- | --- |
-| `index.tsx` | описание плагина и все патчи |
-| `types.ts` | типы квестов, разбор `taskConfig` и `taskConfigV2` |
-| `stores.ts` | поиск сторов Discord по набору методов |
-| `runner.ts` | выполнение квестов, состояние запуска, отмена |
-| `filter.ts` | состояние квеста и фильтр списка |
-| `QuestButton.tsx` | кнопка в панели аккаунта и меню по правому клику |
-| `i18n.ts` | строки интерфейса на трёх языках |
-| `update.ts` | проверка обновлений на GitHub |
-| `native.ts` | два запроса к `discordsays` из главного процесса |
-| `hideHero.css` | скрытие обёртки баннера |
-| `setup.ps1` | установщик |
-| `assets/generate.mjs` | генератор картинок для этого README |
+| `index.tsx` | the plugin definition and every patch |
+| `types.ts` | quest types, `taskConfig` and `taskConfigV2` handling |
+| `stores.ts` | finding Discord stores by their set of methods |
+| `runner.ts` | running quests, run state, cancellation |
+| `filter.ts` | quest state and the list filter |
+| `QuestButton.tsx` | the account panel button and its right click menu |
+| `i18n.ts` | interface strings in three languages |
+| `update.ts` | the GitHub update check |
+| `native.ts` | two `discordsays` requests from the main process |
+| `hideHero.css` | hiding the banner wrapper |
+| `setup.ps1` | the installer |
+| `assets/generate.mjs` | the generator for the images in these READMEs |
 
-Картинки не правятся руками. Поменял цвет или текст в генераторе и пересобрал:
+Images are not edited by hand. Change a color or a string in the generator and rebuild:
 
 ```powershell
 node assets\generate.mjs assets
 ```
 
-После изменений в `native.ts` одного Ctrl+R мало: главный процесс читает его при старте, нужен полный перезапуск Discord.
+After changes to `native.ts`, Ctrl+R is not enough: the main process reads it at startup, so Discord needs a full restart.
 
-**Как отлаживать патчи.** Собери `pnpm build --dev`. Только в dev-сборке Vencord заполняет символы `SYM_PATCHED_BY` и `SYM_PATCHED_SOURCE`, и через `Vencord.WebpackPatcher` видно, какие модули пропатчены и каким получился код:
+**Debugging patches.** Build with `pnpm build --dev`. Only a dev build makes Vencord fill in the `SYM_PATCHED_BY` and `SYM_PATCHED_SOURCE` symbols, and then `Vencord.WebpackPatcher` shows which modules are patched and what the patched code looks like:
 
 ```js
 const { SYM_PATCHED_BY, SYM_PATCHED_SOURCE } = Vencord.WebpackPatcher;
@@ -254,62 +256,60 @@ const m = Vencord.Webpack.wreq.m;
 Object.keys(m).filter(id => m[id][SYM_PATCHED_BY]?.has?.("QuestCompleter"));
 ```
 
-В обычной сборке эти символы пустые, проверять по ним бесполезно. И учти, что `toString()` фабрики модуля всегда возвращает исходный код, а не пропатченный: Vencord специально это скрывает.
+In a normal build those symbols are empty, so checking through them proves nothing. Also note that a module factory's `toString()` always returns the original source, never the patched one: Vencord hides that on purpose.
 
-Патчи применяются лениво, при первой загрузке модуля. Сообщение на старте о непримененном патче это норма для страницы, которую ещё не открывали.
+Patches are applied lazily, the first time a module loads. A message at startup about an unapplied patch is normal for a page you have not opened yet.
 
 </details>
 
-## Проверка файлов
+## Verifying the files
 
-Скрипт из релиза скачивается из интернета и что-то ставит, поэтому проверить его это нормальное желание. Ниже хеши файлов версии 1.2.0 и ссылки на VirusTotal.
+The script from the release is downloaded off the internet and installs things, so wanting to check it is reasonable. Below are the hashes for version 1.2.0 and links to VirusTotal.
 
-| Файл | SHA-256 | Детектов |
+| File | SHA-256 | Detections |
 | --- | --- | --- |
-| `setup.ps1` | `f82452a0…e4913` | [**0 из 62**](https://www.virustotal.com/gui/file/f82452a0e8bd8a13e4b93879657f268f9d2793bb072b215f36ad096a9b1e4913/detection) |
-| `setup.cmd` | `3adb96ca…b87df7` | [**0 из 61**](https://www.virustotal.com/gui/file/3adb96cac1a8d18b86210fa9bebd49dfb39c4fa23a823805c3a557db79b87df7/detection) |
-| `install.cmd` | `905af63d…0d0631` | [**0 из 60**](https://www.virustotal.com/gui/file/905af63d61fa85dd63a435b0c58a77f49c1a0e6ce71c4bf9b80c06a8260d0631/detection) |
-| `uninstall.cmd` | `03db09a1…88db1f` | [**0 из 61**](https://www.virustotal.com/gui/file/03db09a11f612170ebd64cba36461262fb9f182e4d5cb76d22a7ddfe5d88db1f/detection) |
-| `QuestCompleter-1.2.0.zip` | хеш на [странице релиза](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest) | см. релиз |
+| `setup.ps1` | `f82452a0…e4913` | [**0 of 62**](https://www.virustotal.com/gui/file/f82452a0e8bd8a13e4b93879657f268f9d2793bb072b215f36ad096a9b1e4913/detection) |
+| `setup.cmd` | `3adb96ca…b87df7` | [**0 of 61**](https://www.virustotal.com/gui/file/3adb96cac1a8d18b86210fa9bebd49dfb39c4fa23a823805c3a557db79b87df7/detection) |
+| `install.cmd` | `905af63d…0d0631` | [**0 of 60**](https://www.virustotal.com/gui/file/905af63d61fa85dd63a435b0c58a77f49c1a0e6ce71c4bf9b80c06a8260d0631/detection) |
+| `uninstall.cmd` | `03db09a1…88db1f` | [**0 of 61**](https://www.virustotal.com/gui/file/03db09a11f612170ebd64cba36461262fb9f182e4d5cb76d22a7ddfe5d88db1f/detection) |
+| `QuestCompleter-1.2.0.zip` | on the [release page](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest) | see the release |
 
-Три `.cmd` с версии 1.0.0 не менялись, поэтому их проверки от 19 сентября 2026 остаются в силе: ни один антивирус ничего не нашёл. Разное число в знаменателе это нормально, VirusTotal гоняет разный набор движков в зависимости от типа файла.
+The three `.cmd` files have not changed since 1.0.0, so their checks from 19 September 2026 still hold: nothing was flagged. Different denominators are normal, VirusTotal runs a different set of engines depending on file type.
 
-Установщик с 1.1.0 не менялся, у `setup.ps1` тот же хеш. Новый в 1.2.0 только архив: правки были в коде плагина.
+The installer has not changed since 1.1.0 either, `setup.ps1` has the same hash. The only new file in 1.2.0 is the archive, since the changes were in the plugin code.
 
-Проверено 9 октября 2026: ни один антивирус не отметил ни один файл. Ссылки ведут на живые отчёты, там всегда актуальные цифры.
+The archive hash lives on the release page rather than here: the archive contains this README, and a file cannot carry its own hash.
 
-Хеш архива живёт на странице релиза, а не здесь: архив содержит этот же README, и вписать его собственный хеш внутрь него самого невозможно.
+This table describes the files **from the release**. The install command pulls `setup.ps1` from the `main` branch, which moves ahead between releases, so its hash may not match. Hashes are worth comparing against what you downloaded from the release page.
 
-Таблица описывает файлы **из релиза**. Команда установки качает `setup.ps1` из ветки `main`, и между релизами она уходит вперёд, так что хеш может не сойтись. Сверять по хешам имеет смысл то, что скачано со страницы релиза.
-
-Сверить скачанный файл со списком:
+Check a downloaded file against the list:
 
 ```powershell
 Get-FileHash .\setup.ps1 -Algorithm SHA256
 ```
 
-Если хеш совпал, файл ровно тот, что лежит в релизе.
+If the hash matches, the file is exactly the one in the release.
 
-### Что делает установщик
+### What the installer does
 
-Весь код открыт и читается за десять минут, но если коротко:
+All of the code is open and reads in ten minutes, but in short it:
 
-- скачивает Vencord и этот плагин обычным `git clone`
-- ставит зависимости через `pnpm` и собирает проект
-- запускает **официальный установщик Vencord**, который и подключает сборку к Discord
-- по твоему согласию доставляет Node.js и Git через `winget`
-- запоминает путь к Vencord в `%APPDATA%\QuestCompleter`
+- downloads Vencord and this plugin with plain `git clone`
+- installs dependencies with `pnpm` and builds the project
+- runs the **official Vencord installer**, which is what hooks the build into Discord
+- fetches Node.js and Git through `winget` with your consent
+- remembers the Vencord path in `%APPDATA%\QuestCompleter`
 
-Прав администратора не просит, в реестр не пишет, автозапуск не трогает, в сеть ходит только к GitHub и в репозитории winget.
+It does not ask for administrator rights, does not write to the registry, does not touch startup entries, and only talks to GitHub and the winget repositories.
 
-### Почему антивирус может ругаться
+### Why antivirus software may complain
 
-Эвристика не любит сам жанр: PowerShell-скрипт, который скачивает файлы из сети, ставит программы и меняет содержимое установленного приложения. Формально это же поведение и у вполне мирных установщиков.
+Heuristics dislike the genre itself: a PowerShell script that downloads files, installs programs and changes the contents of an installed application. Formally that is what plenty of harmless installers do.
 
-Плюс Vencord меняет файлы Discord, это его работа как клиент-мода. Некоторые защитные решения считают модификацию чужого приложения подозрительной сама по себе, независимо от того, что именно делает мод.
+On top of that, Vencord modifies Discord's files, which is its job as a client mod. Some security products treat modifying someone else's application as suspicious on its own, regardless of what the mod actually does.
 
-Если антивирус что-то показал, сравни детект с названием вроде `Trojan`, `Miner`, `Stealer`, и проверь по хешу выше. Срабатывания на `PowerShell/Agent`, `HackTool`, `Riskware` и подобное это как раз про жанр, а не про конкретную угрозу.
+If your antivirus flagged something, compare the detection name against things like `Trojan`, `Miner` or `Stealer`, and check the hash above. Hits on `PowerShell/Agent`, `HackTool`, `Riskware` and similar are about the genre, not about a specific threat.
 
-## Оговорка
+## Disclaimer
 
-Плагин подделывает прогресс квестов. Это нарушает пользовательское соглашение Discord, награды иногда отзывают. Используешь на свой риск.
+This plugin fakes quest progress. That breaks Discord's terms of service, and rewards are sometimes revoked. Achievement quests additionally grant the game's app access to your account over OAuth, which is why they are off by default. Use at your own risk.
