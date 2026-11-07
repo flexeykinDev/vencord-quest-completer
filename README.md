@@ -234,7 +234,7 @@ Object.keys(m).filter(id => m[id][SYM_PATCHED_BY]?.has?.("QuestCompleter"));
 
 ## Проверка файлов
 
-Скрипт из релиза скачивается из интернета и что-то ставит, поэтому проверить его это нормальное желание. Ниже хеши файлов версии 1.1.1 и ссылки на VirusTotal.
+Скрипт из релиза скачивается из интернета и что-то ставит, поэтому проверить его это нормальное желание. Ниже хеши файлов версии 1.1.2 и ссылки на VirusTotal.
 
 | Файл | SHA-256 | Детектов |
 | --- | --- | --- |
@@ -242,11 +242,11 @@ Object.keys(m).filter(id => m[id][SYM_PATCHED_BY]?.has?.("QuestCompleter"));
 | `setup.cmd` | `3adb96ca…b87df7` | [**0 из 61**](https://www.virustotal.com/gui/file/3adb96cac1a8d18b86210fa9bebd49dfb39c4fa23a823805c3a557db79b87df7/detection) |
 | `install.cmd` | `905af63d…0d0631` | [**0 из 60**](https://www.virustotal.com/gui/file/905af63d61fa85dd63a435b0c58a77f49c1a0e6ce71c4bf9b80c06a8260d0631/detection) |
 | `uninstall.cmd` | `03db09a1…88db1f` | [**0 из 61**](https://www.virustotal.com/gui/file/03db09a11f612170ebd64cba36461262fb9f182e4d5cb76d22a7ddfe5d88db1f/detection) |
-| `QuestCompleter-1.1.1.zip` | хеш на [странице релиза](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest) | **0 из 59** |
+| `QuestCompleter-1.1.2.zip` | хеш на [странице релиза](https://github.com/flexeykinDev/vencord-quest-completer/releases/latest) | см. релиз |
 
 Три `.cmd` с версии 1.0.0 не менялись, поэтому их проверки от 19 сентября 2026 остаются в силе: ни один антивирус ничего не нашёл. Разное число в знаменателе это нормально, VirusTotal гоняет разный набор движков в зависимости от типа файла.
 
-Установщик с 1.1.0 тоже не менялся, у `setup.ps1` тот же хеш. Новый в 1.1.1 только архив: правки были в коде плагина.
+Установщик с 1.1.0 не менялся, у `setup.ps1` тот же хеш. Новый в 1.1.2 только архив: правки были в коде плагина.
 
 Проверено 9 октября 2026: ни один антивирус не отметил ни один файл. Ссылки ведут на живые отчёты, там всегда актуальные цифры.
 
