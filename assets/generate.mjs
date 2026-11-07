@@ -1,7 +1,13 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 // Генератор пиксельной графики для README QuestCompleter.
 // Запуск: node gen-art.mjs <куда-класть-assets>
 
-import { writeFileSync, mkdirSync } from "node:fs";
+import { mkdirSync,writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const OUT = process.argv[2];

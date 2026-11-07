@@ -363,6 +363,27 @@ async function acceptAvailableQuests(signal: AbortSignal) {
 
 const ACHIEVEMENT_SCOPES = "identify applications.commands applications.entitlements";
 
+/** Тело ответа бывает и объектом, и текстом. В сообщении об ошибке нужно и то и другое, но коротко */
+function describeBody(body: unknown) {
+    if (body == null) return "пустой ответ";
+
+    const text = typeof body === "string" ? body : JSON.stringify(body);
+    if (!text) return "пустой ответ";
+
+    return text.length > 200 ? `${text.slice(0, 200)}…` : text;
+}
+
+/**
+ * Цель у таких квестов бывает и в секундах, и в штуках: «сделай 3 сброса денег»
+ * это target = 3. Шаг в 30 единиц для секунд нормален, а для счёта в штуках
+ * прыгает сразу к цели, что и выглядит подделкой, и отлетает по 400.
+ */
+function achievementStep(target: number) {
+    if (target <= 10) return 1;
+
+    return 30 + Math.floor(Math.random() * 20);
+}
+
 async function listGrantIds(): Promise<Set<string>> {
     try {
         const res = await RestAPI.get({ url: "/oauth2/tokens" });
@@ -429,14 +450,16 @@ async function runAchievementInActivity(quest: Quest, applicationId: string, tar
         const referrer = `https://${applicationId}.discordsays.com/?instance_id=example-cl-instance&platform=desktop&discord_proxy_ticket=${ticket}`;
 
         const auth = await Native.discordsaysAuthorize({ appId: applicationId, questId: quest.id, referrer, code });
-        if (!auth.ok || !auth.body?.token) throw new Error(`Активность не авторизовала нас (статус ${auth.status})`);
+        if (!auth.ok || !auth.body?.token) {
+            throw new Error(`Активность не авторизовала нас (${auth.status}): ${describeBody(auth.body)}`);
+        }
 
         let done = 0;
 
         while (done < target) {
             if (signal.aborted) throw new Aborted();
 
-            done = Math.min(target, done + 30 + Math.floor(Math.random() * 20));
+            done = Math.min(target, done + achievementStep(target));
 
             const res = await Native.discordsaysProgress({
                 appId: applicationId,
@@ -446,7 +469,7 @@ async function runAchievementInActivity(quest: Quest, applicationId: string, tar
                 progress: done
             });
 
-            if (!res.ok) throw new Error(`Прогресс не принят (статус ${res.status})`);
+            if (!res.ok) throw new Error(`Прогресс не принят (${res.status}): ${describeBody(res.body)}`);
 
             setState({ isRunning: true, statusText: `${done}/${target}` });
             logger.info(`Достижение: ${done}/${target}`);
@@ -532,9 +555,23 @@ export async function startQuests() {
 
         notify(`Запускаю квесты: ${quests.length}`);
 
+        let failed = 0;
+
         for (let i = 0; i < quests.length; i++) {
             setState({ isRunning: true, statusText: `квест ${i + 1} из ${quests.length}` });
-            await completeQuest(quests[i], signal);
+
+            // Один упавший квест не повод бросать остальные: причина обычно в нём
+            // самом, например он уже пройден или недоступен в этом регионе.
+            try {
+                await completeQuest(quests[i], signal);
+            } catch (err) {
+                if (err instanceof Aborted) throw err;
+
+                failed++;
+                const { questName } = quests[i].config.messages;
+                logger.error(`Квест "${questName}" не получился`, err);
+                notify(`Пропускаю "${questName}": ${err instanceof Error ? err.message : "ошибка"}`, "failure");
+            }
 
             if (i < quests.length - 1) {
                 logger.info("Пауза перед следующим квестом...");
@@ -543,7 +580,8 @@ export async function startQuests() {
             }
         }
 
-        notify("Все квесты выполнены", "success");
+        if (failed === 0) notify("Все квесты выполнены", "success");
+        else notify(`Готово. Не получилось: ${failed} из ${quests.length}`, "failure");
     } catch (err) {
         if (err instanceof Aborted) {
             notify("Остановлено");
